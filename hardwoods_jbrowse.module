@@ -1,0 +1,59 @@
+<?php
+/**
+ * @file
+ * Create and manage JBrowse instances.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function hardwoods_jbrowse_menu() {
+  $items = [];
+
+  // Admin forms
+  $items['admin/hardwoods_jbrowse'] = [
+    'title' => 'Configure JBrowse',
+    'description' => 'Configure hardwoods JBrowse settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => 'hardwoods_jbrowse_configure_form',
+    'access arguments' => ['administer hardwoods jbrowse'],
+    'file' => 'includes/hardwoods_jbrowse_configure.form.inc',
+  ];
+
+  // User forms and pages
+  $items['hardwoods_jbrowse/instances'] = [
+    'title' => 'Manage JBrowse Instances',
+    'description' => 'List and create JBrowse instances.',
+    'page callback' => 'hardwoods_jbrowse_instances_page',
+    'access arguments' => ['administer hardwoods jbrowse'],
+    'file' => 'includes/hardwoods_jbrowse_list.page.inc',
+  ];
+
+  $items['hardwoods_jbrowse/instances/add'] = [
+    'title' => 'Manage JBrowse Instances',
+    'description' => 'List and create JBrowse instances.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => 'hardwoods_jbrowse_add_form',
+    'access arguments' => ['administer hardwoods jbrowse'],
+    'file' => 'includes/hardwoods_jbrowse_add.form.inc',
+  ];
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function hardwoods_jbrowse_permission() {
+  $items = [];
+
+  $items['configure hardwoods jbrowse'] = [
+    'title' => t('Configure Hardwoods JBrowse'),
+  ];
+
+  $items['administer hardwoods jbrowse'] = [
+    'title' => t('Create, edit and delete JBrowse instances'),
+  ];
+
+  return $items;
+}

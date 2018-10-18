@@ -1,0 +1,43 @@
+<?php
+
+/**
+ * Create the schema.
+ *
+ * @return array
+ */
+function hardwoods_jbrowse_schema() {
+  $schema = [];
+
+  $schema['hardwoods_jbrowse_instances'] = [
+    'description' => 'Hardwoods site JBrowse instances.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'description' => 'Primary key',
+        'not null' => TRUE,
+      ],
+      'uid' => [
+        'type' => 'int',
+        'description' => 'Submitter\'s User id',
+        'not null' => TRUE,
+      ],
+      'organism_id' => [
+        'type' => 'int',
+        'not null' => TRUE,
+      ],
+      'title' => [
+        'type' => 'varchar',
+        'length' => 255,
+      ],
+      'description' => [
+        'type' => 'text',
+        'not null' => FALSE,
+      ],
+    ],
+    'primary key' => [
+      'id',
+    ],
+  ];
+
+  return $schema;
+}
