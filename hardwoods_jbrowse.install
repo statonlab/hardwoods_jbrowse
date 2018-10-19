@@ -33,11 +33,62 @@ function hardwoods_jbrowse_schema() {
         'type' => 'text',
         'not null' => FALSE,
       ],
+      'file' => [
+        'type' => 'text',
+        'not null' => FALSE,
+      ],
+      'created_at' => [
+        'type' => 'int',
+        'not null' => 'true',
+      ],
     ],
     'primary key' => [
       'id',
     ],
   ];
+
+  $schema['hardwoods_jbrowse_tracks'] = [
+    'description' => 'Hardwoods site JBrowse tracks.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'description' => 'Primary key',
+        'not null' => TRUE,
+      ],
+      'uid' => [
+        'type' => 'int',
+        'description' => 'Submitter\'s User id',
+        'not null' => TRUE,
+      ],
+      'instance_id' => [
+        'type' => 'int',
+        'not null' => TRUE,
+      ],
+      'organism_id' => [
+        'type' => 'int',
+        'not null' => FALSE,
+      ],
+      'label' => [
+        'type' => 'varchar',
+        'length' => 255,
+      ],
+      'type' => [
+        'type' => 'varchar',
+        'length' => 255,
+      ],
+      'files' => [
+        'type' => 'text',
+      ],
+      'created_at' => [
+        'type' => 'int',
+        'not null' => 'true',
+      ],
+    ],
+    'primary key' => [
+      'id',
+    ],
+  ];
+
 
   return $schema;
 }

@@ -4,6 +4,9 @@
  * Create and manage JBrowse instances.
  */
 
+require_once 'includes/hardwoods_jbrowse.api.inc';
+require_once 'includes/hardwoods_jbrowse.jobs.inc';
+
 /**
  * Implements hook_menu().
  */
@@ -12,31 +15,79 @@ function hardwoods_jbrowse_menu() {
 
   // Admin forms
   $items['admin/hardwoods_jbrowse'] = [
-    'title' => 'Configure JBrowse',
-    'description' => 'Configure hardwoods JBrowse settings',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => 'hardwoods_jbrowse_configure_form',
-    'access arguments' => ['administer hardwoods jbrowse'],
-    'file' => 'includes/hardwoods_jbrowse_configure.form.inc',
-  ];
-
-  // User forms and pages
-  $items['hardwoods_jbrowse/instances'] = [
-    'title' => 'Manage JBrowse Instances',
-    'description' => 'List and create JBrowse instances.',
+    'title' => 'JBrowse',
+    'description' => 'List JBrowse settings',
     'page callback' => 'hardwoods_jbrowse_instances_page',
+    'page arguments' => ['hardwoods_jbrowse_configure_form'],
     'access arguments' => ['administer hardwoods jbrowse'],
     'file' => 'includes/hardwoods_jbrowse_list.page.inc',
+    'type' => MENU_NORMAL_ITEM,
   ];
 
-  $items['hardwoods_jbrowse/instances/add'] = [
-    'title' => 'Manage JBrowse Instances',
+  $items['admin/hardwoods_jbrowse/list'] = [
+    'title' => 'List Instances',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  ];
+
+  $items['admin/hardwoods_jbrowse/configure'] = [
+    'title' => 'Settings',
     'description' => 'List and create JBrowse instances.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => 'hardwoods_jbrowse_add_form',
+    'page arguments' => ['hardwoods_jbrowse_configure_form'],
+    'access arguments' => ['configure hardwoods jbrowse'],
+    'file' => 'includes/hardwoods_jbrowse_configure.form.inc',
+    'type' => MENU_LOCAL_TASK,
+  ];
+
+  $items['admin/hardwoods_jbrowse/instances/add'] = [
+    'title' => 'Add New Instance',
+    'description' => 'List and create JBrowse instances.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['hardwoods_jbrowse_add_form'],
     'access arguments' => ['administer hardwoods jbrowse'],
     'file' => 'includes/hardwoods_jbrowse_add.form.inc',
+    'type' => MENU_LOCAL_ACTION,
   ];
+
+  //  $items['admin/hardwoods_jbrowse/instances/%'] = [
+  //    'title' => 'Add New Instance',
+  //    'description' => 'List and create JBrowse instances.',
+  //    'page callback' => 'drupal_get_form',
+  //    'page arguments' => ['hardwoods_jbrowse_add_form'],
+  //    'access arguments' => ['administer hardwoods jbrowse'],
+  //    'file' => 'includes/hardwoods_jbrowse_add.form.inc',
+  //    'type' => MENU_LOCAL_ACTION,
+  //  ];
+  //
+  //  $items['admin/hardwoods_jbrowse/instances/%/add_track'] = [
+  //    'title' => 'Add New Instance',
+  //    'description' => 'List and create JBrowse instances.',
+  //    'page callback' => 'drupal_get_form',
+  //    'page arguments' => ['hardwoods_jbrowse_add_form'],
+  //    'access arguments' => ['administer hardwoods jbrowse'],
+  //    'file' => 'includes/hardwoods_jbrowse_add.form.inc',
+  //    'type' => MENU_LOCAL_ACTION,
+  //  ];
+  //
+  //  $items['admin/hardwoods_jbrowse/instances/%/edit_track/%'] = [
+  //    'title' => 'Add New Instance',
+  //    'description' => 'List and create JBrowse instances.',
+  //    'page callback' => 'drupal_get_form',
+  //    'page arguments' => ['hardwoods_jbrowse_add_form'],
+  //    'access arguments' => ['administer hardwoods jbrowse'],
+  //    'file' => 'includes/hardwoods_jbrowse_add.form.inc',
+  //    'type' => MENU_LOCAL_ACTION,
+  //  ];
+  //
+  //  $items['admin/hardwoods_jbrowse/instances/%/remove_track'] = [
+  //    'title' => 'Add New Instance',
+  //    'description' => 'List and create JBrowse instances.',
+  //    'page callback' => 'drupal_get_form',
+  //    'page arguments' => ['hardwoods_jbrowse_add_form'],
+  //    'access arguments' => ['administer hardwoods jbrowse'],
+  //    'file' => 'includes/hardwoods_jbrowse_add.form.inc',
+  //    'type' => MENU_LOCAL_ACTION,
+  //  ];
 
   return $items;
 }
