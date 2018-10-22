@@ -6,6 +6,7 @@
 
 require_once 'includes/hardwoods_jbrowse.api.inc';
 require_once 'includes/hardwoods_jbrowse.jobs.inc';
+require_once 'includes/hardwoods_jbrowse_commands.inc';
 
 /**
  * Implements hook_menu().
@@ -56,19 +57,19 @@ function hardwoods_jbrowse_menu() {
     'page arguments' => [3],
     'access arguments' => ['administer hardwoods jbrowse'],
     'file' => 'includes/hardwoods_jbrowse_instance.page.inc',
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
   ];
 
-  //  $items['admin/hardwoods_jbrowse/instances/%/add_track'] = [
-  //    'title' => 'Add New Instance',
-  //    'description' => 'List and create JBrowse instances.',
-  //    'page callback' => 'drupal_get_form',
-  //    'page arguments' => ['hardwoods_jbrowse_add_form'],
-  //    'access arguments' => ['administer hardwoods jbrowse'],
-  //    'file' => 'includes/hardwoods_jbrowse_add.form.inc',
-  //    'type' => MENU_LOCAL_ACTION,
-  //  ];
-  //
+//  $items['admin/hardwoods_jbrowse/instances/%/add_track'] = [
+//    'title' => 'Add New Track',
+//    'description' => 'Add new track to a jbrowse instance.',
+//    'page callback' => 'drupal_get_form',
+//    'page arguments' => ['hardwoods_jbrowse_add_form'],
+//    'access arguments' => ['administer hardwoods jbrowse'],
+//    'file' => 'includes/hardwoods_jbrowse_add.form.inc',
+//    'type' => MENU_LOCAL_ACTION,
+//  ];
+
   //  $items['admin/hardwoods_jbrowse/instances/%/edit_track/%'] = [
   //    'title' => 'Add New Instance',
   //    'description' => 'List and create JBrowse instances.',

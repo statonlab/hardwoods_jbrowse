@@ -107,10 +107,10 @@ function hardwoods_jbrowse_configure_form_validate($form, &$form_state) {
  */
 function hardwoods_jbrowse_configure_form_submit($form, &$form_state) {
   $values = $form_state['values'];
-  $bin_path = DRUPAL_ROOT . '/' . trim($values['bin_path'], '/');
+  $bin_path = rtrim($values['bin_path'], '/');
 
   $settings = [
-    'data_dir' => $values['data_dir'],
+    'data_dir' => rtrim($values['data_dir'], '/'),
     'bin_path' => $bin_path,
     'link' => $values['link'],
   ];
