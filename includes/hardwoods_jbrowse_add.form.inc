@@ -79,6 +79,8 @@ function hardwoods_jbrowse_add_form($form, &$form_state) {
     '#value' => 'Create New Instance',
   ];
 
+
+  $form['#validate'][] = 'hardwoods_jbrowse_add_form_validate';
   return $form;
 }
 
@@ -122,7 +124,6 @@ function hardwoods_jbrowse_add_form_validate($form, &$form_state) {
 
   if (empty($organism)) {
     form_set_error('organism', 'Invalid organism selected ' . $organism);
-    return;
   }
 }
 
@@ -133,7 +134,6 @@ function hardwoods_jbrowse_add_form_validate($form, &$form_state) {
  * @throws \Exception
  */
 function hardwoods_jbrowse_add_form_submit($form, &$form_state) {
-  $form_state['#rebuild'] = TRUE;
   global $user;
 
   $values = $form_state['values'];
@@ -150,7 +150,8 @@ function hardwoods_jbrowse_add_form_submit($form, &$form_state) {
       drupal_set_message('Unable to upload the file', 'error');
     }
 
-    return $form['#redirect'] = 'admin/hardwoods_jbrowse/instances/add';
+    $form['#redirect'] = 'admin/hardwoods_jbrowse/instances/add';
+    return;
   }
 
   $organism = db_select('chado.organism', 'CO')
