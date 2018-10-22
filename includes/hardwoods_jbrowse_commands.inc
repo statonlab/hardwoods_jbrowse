@@ -1,6 +1,6 @@
 <?php
 
-function hardwoods_jbrowse_cmd_prepare_refseq($instance, $file_path) {
+function hardwoods_jbrowse_cmd_prepare_refseq($instance) {
 
 }
 
@@ -34,14 +34,17 @@ function hardwoods_jbrowse_safe_exec(
   &$output = NULL,
   &$return = NULL
 ) {
-  $cmd = escapeshellcmd($command);
+  $cmd = escapeshellcmd($command) . ' ';
   foreach ($args as $flag => $arg) {
-    if (substr($flag, 0, 1) === '-') {
-      $cmd .= escapeshellarg($flag);
+    if (is_string($flag)) {
+      $cmd .= escapeshellarg($flag) . ' ';
     }
 
-    $cmd .= escapeshellarg($arg);
+    $cmd .= escapeshellarg($arg) . ' ';
   }
+
+  print "Running the following command:\n";
+  print $cmd."\n";
 
   return exec($cmd, $output, $return);
 }

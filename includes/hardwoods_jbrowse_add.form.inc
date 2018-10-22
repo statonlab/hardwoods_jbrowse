@@ -79,8 +79,6 @@ function hardwoods_jbrowse_add_form($form, &$form_state) {
     '#value' => 'Create New Instance',
   ];
 
-
-  $form['#validate'][] = 'hardwoods_jbrowse_add_form_validate';
   return $form;
 }
 
@@ -105,6 +103,15 @@ function hardwoods_jbrowse_add_form_validate($form, &$form_state) {
   elseif (empty($file) && !empty($local_file)) {
     if (!file_exists($local_file)) {
       form_set_error('ref_seq_path', 'The file path provided does not exist.');
+    }
+  }
+  else {
+    $file = hardwoods_jbrowse_upload_file('ref_seq_file');
+    if (!$file) {
+      form_set_error('ref_seq_file', 'Unable to upload file');
+    }
+    else {
+      $form_state['values']['uploaded_file'] = $file;
     }
   }
 
@@ -140,19 +147,14 @@ function hardwoods_jbrowse_add_form_submit($form, &$form_state) {
   $organism_id = $values['organism'];
   $description = isset($values['description']) ? $values['description'] : '';
 
-  $file = $_FILES['files']['tmp_name']['ref_seq_file'];
-  if (empty($file)) {
+  if (empty($values['uploaded_file'])) {
     $file = $values['ref_seq_path'];
   }
   else {
-    $file = hardwoods_jbrowse_upload_file('ref_seq_file');
-    if (!$file) {
-      drupal_set_message('Unable to upload the file', 'error');
-    }
-
-    $form['#redirect'] = 'admin/hardwoods_jbrowse/instances/add';
-    return;
+    $file = $values['uploaded_file'];
   }
+
+  dpm($file);
 
   $organism = db_select('chado.organism', 'CO')
     ->fields('CO')
@@ -183,7 +185,7 @@ function hardwoods_jbrowse_add_form_submit($form, &$form_state) {
       $user->uid
     );
     drupal_goto("admin/hardwoods_jbrowse/instances/$instance_id");
-    return;
+    return $form;
   }
 
   drupal_set_message('Failed to create instance!');

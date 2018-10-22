@@ -8,9 +8,7 @@ function hardwoods_jbrowse_instance_page($instance_id) {
     return;
   }
 
-  dpm($instance);
   drupal_set_title("Manage $instance->title JBrowse");
-
 
   $content = '';
   $table = theme(
@@ -24,11 +22,10 @@ function hardwoods_jbrowse_instance_page($instance_id) {
           'Organism',
           "{$instance->organism->genus} {$instance->organism->species}",
         ],
-        ['Created By', "<b>{$instance->user->name}</b>"]
+        ['Created By', "<b>{$instance->user->name}</b>"],
       ],
     ]
   );
-
 
   $content .= $table;
   return $content;

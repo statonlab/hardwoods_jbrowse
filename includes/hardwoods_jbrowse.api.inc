@@ -104,14 +104,13 @@ function hardwoods_jbrowse_create_instance($data) {
       'title' => $data['title'],
       'description' => isset($data['description']) ? $data['description'] : '',
       'created_at' => $data['created_at'],
+      'file' => $data['file']
     ]
   )->execute();
 
   if (!$instance_id) {
     return FALSE;
   }
-
-  hardwoods_jbrowse_create_instance_files($instance_id);
 
   return $instance_id;
 }
@@ -213,7 +212,7 @@ function hardwoods_jbrowse_make_slug($string) {
   $slug = str_replace('\\', '_', $slug);
   $slug = str_replace(':', '_', $slug);
 
-  return $slug;
+  return trim($slug, '_');
 }
 
 
@@ -235,5 +234,5 @@ function hardwoods_jbrowse_upload_file($field) {
 
   $file = file_move($file, $directory . '/' . $file->filename);
 
-  return !$file ? FALSE : drupal_realpath($file->uri);
+  return !$file ? false : drupal_realpath($file->uri);
 }
