@@ -1,11 +1,80 @@
 <?php
 
+/**
+ * Add a reference sequence to the instance.
+ *
+ * @param $instance
+ *
+ * @return string
+ * @throws \Exception
+ */
 function hardwoods_jbrowse_cmd_prepare_refseq($instance) {
+  $settings = hardwoods_jbrowse_get_settings();
 
+  $data = $settings['data_dir'];
+  $bin = $settings['bin_path'];
+
+  $path = $data . '/' . hardwoods_jbrowse_make_slug($instance->title);
+  if (!file_exists($path)) {
+    if (!mkdir($path)) {
+      throw new Exception(
+        'Unable to make data directory! Please make sure the directory 
+      at ' . $data . ' exists and is writable by the current user.'
+      );
+    }
+  }
+
+  $out = $path . '/data';
+  return hardwoods_jbrowse_safe_exec(
+    'perl',
+    [
+      $bin . '/prepare-refseqs.pl',
+      '--fasta',
+      $instance->file,
+      '--out',
+      $out,
+    ]
+  );
 }
 
-function hardwoods_jbrowse_cmd_add_track($instance, $type, $file_path) {
+/**
+ * Add a track to an instance.
+ *
+ * @param $track
+ *
+ * @return string
+ * @throws \Exception
+ */
+function hardwoods_jbrowse_cmd_add_track($track) {
+  $settings = hardwoods_jbrowse_get_settings();
 
+  $data = $settings['data_dir'];
+  $bin = $settings['bin_path'];
+  $instance = $track->instance;
+
+  $path = $data . '/' . hardwoods_jbrowse_make_slug($instance->title);
+  $out = $path . '/data';
+
+  if (!file_exists($out)) {
+    throw new Exception('Data directory does not exist: ' . $out);
+  }
+
+  return hardwoods_jbrowse_safe_exec(
+    'perl',
+    [
+      $bin . '/flatfile-to-json.pl',
+      '--' . $track->file_type,
+      $instance->file,
+      '--trackLabel',
+      hardwoods_jbrowse_make_slug($track->label),
+      '--key',
+      $track->label,
+      '--out',
+      $out,
+      '--trackType',
+      $track->track_type,
+    ]
+  );
 }
 
 /**
@@ -44,7 +113,7 @@ function hardwoods_jbrowse_safe_exec(
   }
 
   print "Running the following command:\n";
-  print $cmd."\n";
+  print $cmd . "\n";
 
   return exec($cmd, $output, $return);
 }

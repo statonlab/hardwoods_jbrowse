@@ -72,11 +72,15 @@ function hardwoods_jbrowse_schema() {
         'type' => 'varchar',
         'length' => 255,
       ],
-      'type' => [
+      'track_type' => [
         'type' => 'varchar',
         'length' => 255,
       ],
-      'files' => [
+      'file_type' => [
+        'type' => 'varchar',
+        'length' => 255,
+      ],
+      'file' => [
         'type' => 'text',
       ],
       'created_at' => [
@@ -88,7 +92,6 @@ function hardwoods_jbrowse_schema() {
       'id',
     ],
   ];
-
 
   return $schema;
 }
