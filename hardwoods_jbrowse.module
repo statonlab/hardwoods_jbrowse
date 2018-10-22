@@ -49,16 +49,16 @@ function hardwoods_jbrowse_menu() {
     'type' => MENU_LOCAL_ACTION,
   ];
 
-  //  $items['admin/hardwoods_jbrowse/instances/%'] = [
-  //    'title' => 'Add New Instance',
-  //    'description' => 'List and create JBrowse instances.',
-  //    'page callback' => 'drupal_get_form',
-  //    'page arguments' => ['hardwoods_jbrowse_add_form'],
-  //    'access arguments' => ['administer hardwoods jbrowse'],
-  //    'file' => 'includes/hardwoods_jbrowse_add.form.inc',
-  //    'type' => MENU_LOCAL_ACTION,
-  //  ];
-  //
+  $items['admin/hardwoods_jbrowse/instances/%'] = [
+    'title' => 'Manage Instance',
+    'description' => 'View an instance and manage its tracks.',
+    'page callback' => 'hardwoods_jbrowse_instance_page',
+    'page arguments' => [3],
+    'access arguments' => ['administer hardwoods jbrowse'],
+    'file' => 'includes/hardwoods_jbrowse_instance.page.inc',
+    'type' => MENU_LOCAL_TASK,
+  ];
+
   //  $items['admin/hardwoods_jbrowse/instances/%/add_track'] = [
   //    'title' => 'Add New Instance',
   //    'description' => 'List and create JBrowse instances.',
