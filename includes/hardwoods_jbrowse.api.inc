@@ -321,3 +321,81 @@ function hardwoods_jbrowse_upload_file($field) {
 
   return !$file ? FALSE : drupal_realpath($file->uri);
 }
+
+/**
+ * Build the http query for a given instance to link to JBrowse.
+ *
+ * @param $instance
+ *
+ * @return array
+ */
+function hardwoods_jbrowse_build_http_query($instance) {
+  $path = hardwoods_jbrowse_make_slug($instance->title);
+  $tracks = hardwoods_jbrowse_get_tracks($instance);
+  $tracks_path = '';
+  if (!empty($tracks)) {
+    $tracks_path = implode(
+      ',',
+      array_map(
+        function ($track) {
+          return hardwoods_jbrowse_make_slug($track->label);
+        },
+        $tracks
+      )
+    );
+  }
+
+  return [
+    'data' => "data/$path/data",
+    'tracks' => $tracks_path,
+  ];
+}
+
+/**
+ * Get trackList.json for an instance.
+ *
+ * @param $instance
+ *
+ * @return array Decoded json array.
+ *
+ * @throws \Exception
+ */
+function hardwoods_jbrowse_get_json($instance) {
+  $path = hardwoods_jbrowse_get_track_list_file_path($instance);
+
+  $contents = file_get_contents($path);
+  if (!$contents) {
+    throw new Exception('Unable to find ' . $path . ' file');
+  }
+
+  return json_decode($contents, TRUE);
+}
+
+/**
+ * @param $instance
+ * @param $data
+ *
+ * @throws \Exception
+ */
+function hardwoods_jbrowse_save_json($instance, $data) {
+  $path = hardwoods_jbrowse_get_track_list_file_path($instance);
+
+  $json = hardwoods_jbrowse_get_json($instance);
+
+  file_put_contents($path, json_encode($data + $json));
+}
+
+/**
+ * @param $instance
+ *
+ * @return string
+ */
+function hardwoods_jbrowse_get_track_list_file_path($instance) {
+  $settings = hardwoods_jbrowse_get_settings();
+
+  $path = $settings['data_dir'];
+  $path .= '/' . hardwoods_jbrowse_make_slug($instance->title);
+  $path .= '/data/trackList.json';
+
+  return $path;
+}

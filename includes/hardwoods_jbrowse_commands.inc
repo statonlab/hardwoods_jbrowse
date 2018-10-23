@@ -25,7 +25,7 @@ function hardwoods_jbrowse_cmd_prepare_refseq($instance) {
   }
 
   $out = $path . '/data';
-  return hardwoods_jbrowse_safe_exec(
+  hardwoods_jbrowse_safe_exec(
     'perl',
     [
       $bin . '/prepare-refseqs.pl',
@@ -33,8 +33,12 @@ function hardwoods_jbrowse_cmd_prepare_refseq($instance) {
       $instance->file,
       '--out',
       $out,
-    ]
+    ],
+    $ignore,
+    $ret
   );
+
+  return $ret;
 }
 
 /**
@@ -59,7 +63,7 @@ function hardwoods_jbrowse_cmd_add_track($track) {
     throw new Exception('Data directory does not exist: ' . $out);
   }
 
-  return hardwoods_jbrowse_safe_exec(
+  hardwoods_jbrowse_safe_exec(
     'perl',
     [
       $bin . '/flatfile-to-json.pl',
@@ -73,8 +77,51 @@ function hardwoods_jbrowse_cmd_add_track($track) {
       $out,
       '--trackType',
       $track->track_type,
-    ]
+    ],
+    $ignore,
+    $ret
   );
+
+  return $ret;
+}
+
+/**
+ * Generate names for a specific instance.
+ *
+ * @param $instance
+ *
+ * @return string
+ * @throws \Exception
+ */
+function hardwoods_jbrowse_cmd_generate_names($instance) {
+  $settings = hardwoods_jbrowse_get_settings();
+
+  $data = $settings['data_dir'];
+  $bin = $settings['bin_path'];
+
+  $path = $data . '/' . hardwoods_jbrowse_make_slug($instance->title);
+  if (!file_exists($path)) {
+    if (!mkdir($path)) {
+      throw new Exception(
+        'Unable to make data directory! Please make sure the directory 
+      at ' . $data . ' exists and is writable by the current user.'
+      );
+    }
+  }
+
+  $out = $path . '/data';
+  hardwoods_jbrowse_safe_exec(
+    'perl',
+    [
+      $bin . '/generate-names',
+      '--out',
+      $out,
+    ],
+    $ignore,
+    $ret
+  );
+
+  return $ret;
 }
 
 /**

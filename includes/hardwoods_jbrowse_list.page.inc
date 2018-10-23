@@ -6,6 +6,7 @@
  */
 function hardwoods_jbrowse_instances_page() {
   $instances = hardwoods_jbrowse_get_instances();
+  $settings = hardwoods_jbrowse_get_settings();
 
   $content = [];
 
@@ -28,7 +29,11 @@ function hardwoods_jbrowse_instances_page() {
   $rows = [];
   foreach ($instances as $instance) {
     $rows[] = [
-      $instance->title,
+      l(
+        $instance->title,
+        "{$settings['link']}",
+        ['query' => hardwoods_jbrowse_build_http_query($instance)]
+      ),
       $instance->user->name,
       $instance->description ?: 'Not provided',
       l('Manage Tracks', 'admin/hardwoods_jbrowse/instances/' . $instance->id),
