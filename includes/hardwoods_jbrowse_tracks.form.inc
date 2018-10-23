@@ -42,7 +42,7 @@ function hardwoods_jbrowse_add_track_form($form, &$form_state, $instance_id) {
   $form['data']['file_type'] = [
     '#type' => 'select',
     '#title' => t('File Type'),
-    '#options' => drupal_map_assoc(['gff', 'fasta']),
+    '#options' => drupal_map_assoc(['gff', 'bed', 'gbk']),
     '#description' => t(
       'See http://gmod.org/wiki/JBrowse_Configuration_Guide#flatfile-to-json.pl for more info.'
     ),
