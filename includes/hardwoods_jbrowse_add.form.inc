@@ -154,8 +154,6 @@ function hardwoods_jbrowse_add_form_submit($form, &$form_state) {
     $file = $values['uploaded_file'];
   }
 
-  dpm($file);
-
   $organism = db_select('chado.organism', 'CO')
     ->fields('CO')
     ->condition('organism_id', $organism_id)

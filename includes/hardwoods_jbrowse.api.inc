@@ -104,7 +104,7 @@ function hardwoods_jbrowse_create_instance($data) {
       'title' => $data['title'],
       'description' => isset($data['description']) ? $data['description'] : '',
       'created_at' => $data['created_at'],
-      'file' => $data['file']
+      'file' => $data['file'],
     ]
   )->execute();
 
@@ -168,10 +168,95 @@ function hardwoods_jbrowse_delete_instance($instance) {
     ->execute();
 }
 
-function hardwoods_jbrowse_create_track($data) {
+/**
+ * Create a new JBrowse track for a given instance.
+ *
+ * @param $data
+ *
+ * @return bool|int Track ID or FALSE if an error occurs.
+ * @throws \Exception
+ */
+function hardwoods_jbrowse_create_track($instance, $data) {
+  global $user;
+
+  $track_id = db_insert('hardwoods_jbrowse_tracks')->fields(
+    [
+      'uid' => $user->uid,
+      'instance_id' => $instance->id,
+      'organism_id' => $instance->organism_id,
+      'label' => $data['label'],
+      'track_type' => $data['track_type'],
+      'file_type' => $data['file_type'],
+      'created_at' => $data['created_at'],
+      'file' => $data['file'],
+    ]
+  )->execute();
+
+  if (!$track_id) {
+    return FALSE;
+  }
+
+  return $track_id;
 }
 
-function hardwoods_jbrowse_delete_track($data) {
+/**
+ * Delete a track by ID.
+ *
+ * @param $track_id
+ *
+ * @return int
+ */
+function hardwoods_jbrowse_delete_track($track_id) {
+  return db_delete('hardwoods_jbrowse_tracks')
+    ->condition('id', $track_id)
+    ->execute();
+}
+
+/**
+ * Get attached tracks with users pre-loaded.
+ *
+ * @param $instance
+ *
+ * @return mixed
+ */
+function hardwoods_jbrowse_get_tracks($instance) {
+  static $users = [];
+
+  $tracks = db_select('hardwoods_jbrowse_tracks', 'HJT')
+    ->fields('HJT')
+    ->condition('instance_id', $instance->id)
+    ->execute()
+    ->fetchAll();
+
+  foreach ($tracks as &$track) {
+    if (!isset($users[$track->uid])) {
+      $users[$track->uid] = user_load($track->uid);
+    }
+
+    $track->user = $users[$track->uid];
+  }
+
+  return $tracks;
+}
+
+/**
+ * Get a track with instance and user data attached.
+ *
+ * @param $track_id
+ *
+ * @return mixed
+ */
+function hardwoods_jbrowse_get_track($track_id) {
+  $track = db_select('hardwoods_jbrowse_tracks', 'HJT')
+    ->fields('HJT')
+    ->condition('id', $track_id)
+    ->execute()
+    ->fetchObject();
+
+  $track->user = user_load($track->uid);
+  $track->instance = hardwoods_jbrowse_get_instance($track->instance_id);
+
+  return $track;
 }
 
 /**
@@ -212,7 +297,7 @@ function hardwoods_jbrowse_make_slug($string) {
   $slug = str_replace('\\', '_', $slug);
   $slug = str_replace(':', '_', $slug);
 
-  return trim($slug, '_');
+  return strtolower(trim($slug, '_'));
 }
 
 
@@ -234,5 +319,5 @@ function hardwoods_jbrowse_upload_file($field) {
 
   $file = file_move($file, $directory . '/' . $file->filename);
 
-  return !$file ? false : drupal_realpath($file->uri);
+  return !$file ? FALSE : drupal_realpath($file->uri);
 }
