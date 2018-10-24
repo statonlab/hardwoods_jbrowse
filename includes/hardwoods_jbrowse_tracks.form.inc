@@ -31,11 +31,7 @@ function hardwoods_jbrowse_add_track_form($form, &$form_state, $instance_id) {
     '#required' => TRUE,
     '#title' => t('Track Type'),
     '#options' => drupal_map_assoc(
-      [
-        'FeatureTrack',
-        'CanvasFeatures',
-        'HTMLFeatures',
-      ]
+      hardwoods_get_track_types()
     ),
   ];
 
@@ -138,35 +134,4 @@ function hardwoods_jbrowse_add_track_form_submit($form, &$form_state) {
   );
 
   drupal_goto('admin/hardwoods_jbrowse/instances/' . $instance->id);
-}
-
-/**
- * @param array $form
- * @param array $form_state
- * @param int $track_id
- *
- * @return array
- * @throws \Exception
- */
-function hardwoods_jbrowse_manage_track_form($form, &$form_state, $track_id) {
-  $track = hardwoods_jbrowse_get_track($track_id);
-  if (empty($track)) {
-    drupal_not_found();
-    return $form;
-  }
-
-  $form['label'] = [
-    '#type' => 'textfield',
-    '#title' => t('Label'),
-    '#description' => t('Change the label'),
-  ];
-
-  $instance = hardwoods_jbrowse_get_instance($track->instance_id);
-  $data = print_r(hardwoods_jbrowse_get_json($instance), TRUE);
-  $form['d'] = [
-    '#type' => 'markup',
-    '#markup' => '<pre>'.$data.'</pre>',
-  ];
-
-  return $form;
 }

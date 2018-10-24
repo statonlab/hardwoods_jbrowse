@@ -260,6 +260,19 @@ function hardwoods_jbrowse_get_track($track_id) {
 }
 
 /**
+ * @param $track
+ * @param array $fields
+ *
+ * @return \DatabaseStatementInterface
+ */
+function hardwoods_jbrowse_update_track($track, array $fields) {
+  return db_update('hardwoods_jbrowse_tracks')
+    ->fields($fields)
+    ->condition('id', $track->id)
+    ->execute();
+}
+
+/**
  * Get a list of organisms.
  *
  * @return mixed
@@ -376,13 +389,16 @@ function hardwoods_jbrowse_get_json($instance) {
  * @param $data
  *
  * @throws \Exception
+ * @return bool|int
  */
 function hardwoods_jbrowse_save_json($instance, $data) {
   $path = hardwoods_jbrowse_get_track_list_file_path($instance);
 
-  $json = hardwoods_jbrowse_get_json($instance);
+  $default = hardwoods_jbrowse_get_json($instance);
+  $json = $data + $default;
+  $encoded = json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
-  file_put_contents($path, json_encode($data + $json));
+  return file_put_contents($path, $encoded);
 }
 
 /**
@@ -398,4 +414,17 @@ function hardwoods_jbrowse_get_track_list_file_path($instance) {
   $path .= '/data/trackList.json';
 
   return $path;
+}
+
+/**
+ * Gets a list of supported track types.
+ *
+ * @return array
+ */
+function hardwoods_get_track_types() {
+  return [
+    'FeatureTrack',
+    'CanvasFeatures',
+    'HTMLFeatures',
+  ];
 }

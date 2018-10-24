@@ -1,11 +1,17 @@
 <?php
 
+/**
+ * @param $instance_id
+ *
+ * @return mixed
+ * @throws \Exception
+ */
 function hardwoods_jbrowse_instance_page($instance_id) {
   $instance = hardwoods_jbrowse_get_instance($instance_id);
 
   if (empty($instance)) {
     drupal_not_found();
-    return;
+    return '';
   }
 
   drupal_set_title("Manage $instance->title JBrowse");
