@@ -113,7 +113,7 @@ function hardwoods_jbrowse_cmd_generate_names($instance) {
   hardwoods_jbrowse_safe_exec(
     'perl',
     [
-      $bin . '/generate-names',
+      $bin . '/generate-names.pl',
       '--out',
       $out,
     ],
