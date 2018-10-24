@@ -197,5 +197,7 @@ function hardwoods_jbrowse_delete_track_form_submit($form, &$form_state) {
     $user->uid
   );
 
+  hardwoods_jbrowse_update_track($track, ['is_deleted' => 1]);
+
   drupal_goto('admin/hardwoods_jbrowse/instances/' . $track->instance_id);
 }

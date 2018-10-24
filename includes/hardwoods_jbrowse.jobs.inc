@@ -67,6 +67,7 @@ function hardwoods_jbrowse_delete_track_from_instance($track_id)
   }
 
   if (hardwoods_jbrowse_cmd_delete_track($track) != 0) {
+    hardwoods_jbrowse_update_track($track, ['is_deleted' => 0]);
     throw new Exception('Unable to add track. See errors above.');
   }
 

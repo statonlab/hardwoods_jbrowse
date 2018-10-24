@@ -37,7 +37,7 @@ function hardwoods_jbrowse_instance_page($instance_id) {
     ),
   ];
 
-  $tracks = hardwoods_jbrowse_get_tracks($instance);
+  $tracks = hardwoods_jbrowse_get_tracks($instance, ['is_deleted' => 0]);
 
   $content['tracks_title'] = [
     '#type' => 'item',
@@ -60,6 +60,7 @@ function hardwoods_jbrowse_instance_page($instance_id) {
           date('m/d/Y', $track->created_at),
           l('Manage Track', 'admin/hardwoods_jbrowse/tracks/' . $track->id),
           l('Delete Track', 'admin/hardwoods_jbrowse/tracks/' . $track->id . '/delete'),
+          $track->is_deleted,
         ];
       },
       $tracks
@@ -77,7 +78,8 @@ function hardwoods_jbrowse_instance_page($instance_id) {
             'Created By',
             'Created At',
             'Manage',
-            'Delete Track'
+            'Delete Track',
+            'Is Deleted',
           ],
           'rows' => $rows,
         ]
