@@ -1,5 +1,6 @@
 {
     "require": {
-        "statonlab/tripal-test-suite": "^1.5"
+        "statonlab/tripal-test-suite": "^1.5",
+        "ext-json": "*"
     }
 }
