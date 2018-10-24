@@ -1,11 +1,17 @@
 <?php
 
+/**
+ * @param $instance_id
+ *
+ * @return mixed
+ * @throws \Exception
+ */
 function hardwoods_jbrowse_instance_page($instance_id) {
   $instance = hardwoods_jbrowse_get_instance($instance_id);
 
   if (empty($instance)) {
     drupal_not_found();
-    return;
+    return '';
   }
 
   drupal_set_title("Manage $instance->title JBrowse");
@@ -33,6 +39,10 @@ function hardwoods_jbrowse_instance_page($instance_id) {
 
   $tracks = hardwoods_jbrowse_get_tracks($instance);
 
+  $content['tracks_title'] = [
+    '#type' => 'item',
+    '#markup' => '<h4>Tracks</h4>',
+  ];
   if (empty($tracks)) {
     $content['no_tracks'] = [
       '#type' => 'item',
@@ -40,10 +50,21 @@ function hardwoods_jbrowse_instance_page($instance_id) {
     ];
   }
   else {
-    $content['tracks_label'] = [
-      '#type' => 'item',
-      '#markup' => '<h4>Tracks</h4>',
-    ];
+    $rows = array_map(
+      function ($track) {
+        return [
+          $track->label,
+          $track->track_type,
+          $track->file_type,
+          $track->user->name,
+          date('m/d/Y', $track->created_at),
+          l('Manage Track', 'admin/hardwoods_jbrowse/tracks/' . $track->id),
+          l('Delete Track', 'admin/hardwoods_jbrowse/tracks/' . $track->id . '/delete'),
+        ];
+      },
+      $tracks
+    );
+
     $content['tracks_table'] = [
       '#type' => 'markup',
       '#markup' => theme(
@@ -55,22 +76,10 @@ function hardwoods_jbrowse_instance_page($instance_id) {
             'File Type',
             'Created By',
             'Created At',
+            'Manage',
             'Delete Track'
-
           ],
-          'rows' => array_map(
-            function ($track) {
-              return [
-                $track->label,
-                $track->track_type,
-                $track->file_type,
-                $track->user->name,
-                date('m/d/Y', $track->created_at),
-                'anything',
-              ];
-            },
-            $tracks
-          ),
+          'rows' => $rows,
         ]
       ),
     ];

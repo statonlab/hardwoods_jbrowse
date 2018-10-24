@@ -70,25 +70,24 @@ function hardwoods_jbrowse_menu() {
     'type' => MENU_LOCAL_ACTION,
   ];
 
-  //  $items['admin/hardwoods_jbrowse/instances/%/edit_track/%'] = [
-  //    'title' => 'Add New Instance',
-  //    'description' => 'List and create JBrowse instances.',
-  //    'page callback' => 'drupal_get_form',
-  //    'page arguments' => ['hardwoods_jbrowse_add_form'],
-  //    'access arguments' => ['administer hardwoods jbrowse'],
-  //    'file' => 'includes/hardwoods_jbrowse_add.form.inc',
-  //    'type' => MENU_LOCAL_ACTION,
-  //  ];
-  //
-  //  $items['admin/hardwoods_jbrowse/instances/%/remove_track'] = [
-  //    'title' => 'Add New Instance',
-  //    'description' => 'List and create JBrowse instances.',
-  //    'page callback' => 'drupal_get_form',
-  //    'page arguments' => ['hardwoods_jbrowse_add_form'],
-  //    'access arguments' => ['administer hardwoods jbrowse'],
-  //    'file' => 'includes/hardwoods_jbrowse_add.form.inc',
-  //    'type' => MENU_LOCAL_ACTION,
-  //  ];
+  $items['admin/hardwoods_jbrowse/tracks/%'] = [
+    'title' => 'Edit Track',
+    'description' => 'Edit tracks.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['hardwoods_jbrowse_json_editor_form', 3],
+    'access arguments' => ['administer hardwoods jbrowse'],
+    'file' => 'includes/hardwoods_jbrowse_json_editor.form.inc',
+    'type' => MENU_CALLBACK,
+  ];
+
+    $items['admin/hardwoods_jbrowse/tracks/%/delete'] = [
+      'title' => 'Delete Track',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => ['hardwoods_jbrowse_delete_track_form', 3],
+      'access arguments' => ['administer hardwoods jbrowse'],
+      'file' => 'includes/hardwoods_jbrowse_tracks.form.inc',
+      'type' => MENU_LOCAL_ACTION,
+    ];
 
   return $items;
 }

@@ -260,6 +260,19 @@ function hardwoods_jbrowse_get_track($track_id) {
 }
 
 /**
+ * @param $track
+ * @param array $fields
+ *
+ * @return \DatabaseStatementInterface
+ */
+function hardwoods_jbrowse_update_track($track, array $fields) {
+  return db_update('hardwoods_jbrowse_tracks')
+    ->fields($fields)
+    ->condition('id', $track->id)
+    ->execute();
+}
+
+/**
  * Get a list of organisms.
  *
  * @return mixed
@@ -320,4 +333,98 @@ function hardwoods_jbrowse_upload_file($field) {
   $file = file_move($file, $directory . '/' . $file->filename);
 
   return !$file ? FALSE : drupal_realpath($file->uri);
+}
+
+/**
+ * Build the http query for a given instance to link to JBrowse.
+ *
+ * @param $instance
+ *
+ * @return array
+ */
+function hardwoods_jbrowse_build_http_query($instance) {
+  $path = hardwoods_jbrowse_make_slug($instance->title);
+  $tracks = hardwoods_jbrowse_get_tracks($instance);
+  $tracks_path = '';
+  if (!empty($tracks)) {
+    $tracks_path = implode(
+      ',',
+      array_map(
+        function ($track) {
+          return hardwoods_jbrowse_make_slug($track->label);
+        },
+        $tracks
+      )
+    );
+  }
+
+  return [
+    'data' => "data/$path/data",
+    'tracks' => $tracks_path,
+  ];
+}
+
+/**
+ * Get trackList.json for an instance.
+ *
+ * @param $instance
+ *
+ * @return array Decoded json array.
+ *
+ * @throws \Exception
+ */
+function hardwoods_jbrowse_get_json($instance) {
+  $path = hardwoods_jbrowse_get_track_list_file_path($instance);
+
+  $contents = file_get_contents($path);
+  if (!$contents) {
+    throw new Exception('Unable to find ' . $path . ' file');
+  }
+
+  return json_decode($contents, TRUE);
+}
+
+/**
+ * @param $instance
+ * @param $data
+ *
+ * @throws \Exception
+ * @return bool|int
+ */
+function hardwoods_jbrowse_save_json($instance, $data) {
+  $path = hardwoods_jbrowse_get_track_list_file_path($instance);
+
+  $default = hardwoods_jbrowse_get_json($instance);
+  $json = $data + $default;
+  $encoded = json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+
+  return file_put_contents($path, $encoded);
+}
+
+/**
+ * @param $instance
+ *
+ * @return string
+ */
+function hardwoods_jbrowse_get_track_list_file_path($instance) {
+  $settings = hardwoods_jbrowse_get_settings();
+
+  $path = $settings['data_dir'];
+  $path .= '/' . hardwoods_jbrowse_make_slug($instance->title);
+  $path .= '/data/trackList.json';
+
+  return $path;
+}
+
+/**
+ * Gets a list of supported track types.
+ *
+ * @return array
+ */
+function hardwoods_get_track_types() {
+  return [
+    'FeatureTrack',
+    'CanvasFeatures',
+    'HTMLFeatures',
+  ];
 }
