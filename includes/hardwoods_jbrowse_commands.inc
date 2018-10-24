@@ -78,6 +78,39 @@ function hardwoods_jbrowse_cmd_add_track($track) {
 }
 
 /**
+ * Delete a track to an instance.
+ *
+ * @param $track
+ *
+ * @return string
+ * @throws \Exception
+ */
+function hardwoods_jbrowse_cmd_delete_track($track) {
+    $settings = hardwoods_jbrowse_get_settings();
+
+    $data = $settings['data_dir'];
+    $bin = $settings['bin_path'];
+    $instance = $track->instance;
+
+    $path = $data . '/' . hardwoods_jbrowse_make_slug($instance->title);
+    $out = $path . '/data';
+
+    if (!file_exists($out)) {
+        throw new Exception('Data directory does not exist: ' . $out);
+    }
+
+    return hardwoods_jbrowse_safe_exec(
+        'perl',
+        [
+            $bin . '/remove-track.pl',
+            '--trackLabel',
+            hardwoods_jbrowse_make_slug($track->label),
+            '--delete',
+        ]
+    );
+}
+
+/**
  * Safely execute a command.
  *
  * @param string $command The path to the command to execute.

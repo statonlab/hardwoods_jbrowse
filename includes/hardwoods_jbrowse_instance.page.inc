@@ -55,6 +55,8 @@ function hardwoods_jbrowse_instance_page($instance_id) {
             'File Type',
             'Created By',
             'Created At',
+            'Delete Track'
+
           ],
           'rows' => array_map(
             function ($track) {
@@ -63,7 +65,8 @@ function hardwoods_jbrowse_instance_page($instance_id) {
                 $track->track_type,
                 $track->file_type,
                 $track->user->name,
-                date('m/d/Y', $track->created_at)
+                date('m/d/Y', $track->created_at),
+                'anything',
               ];
             },
             $tracks
