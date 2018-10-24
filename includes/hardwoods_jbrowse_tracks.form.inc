@@ -135,3 +135,69 @@ function hardwoods_jbrowse_add_track_form_submit($form, &$form_state) {
 
   drupal_goto('admin/hardwoods_jbrowse/instances/' . $instance->id);
 }
+
+function hardwoods_jbrowse_delete_track_form($form, &$form_state, $track_id) {
+
+  $track = hardwoods_jbrowse_get_track($track_id);
+
+  if (!$track->id) {
+    $form['error'] = [
+      '#type' => 'item',
+      '#markup' => '<p style="color: red">Unable to find track.</p>',
+    ];
+    return $form;
+  }
+
+  $form['description'] = [
+    '#type' => 'item',
+    '#markup' => 'Are you sure you want to delete the ' . $track->label . ' track?',
+  ];
+
+  $form['track_id'] = [
+    '#type' => 'hidden',
+    '#value' => $track_id,
+  ];
+
+  $form['submit'] = [
+    '#type' => 'submit',
+    '#value' => 'Delete Track',
+  ];
+
+  $form['cancel'] = [
+    '#type' => 'markup',
+    '#markup' => l('Cancel', 'admin/hardwoods_jbrowse/instances/' .
+      $track->instance_id),
+  ];
+
+  return $form;
+}
+
+/**
+ * @param $form
+ * @param $form_state
+ *
+ * @throws \Exception
+ */
+function hardwoods_jbrowse_delete_track_form_submit($form, &$form_state) {
+  global $user;
+  $values = $form_state['values'];
+
+  $file = isset($values['file_path']) ? $values['file_path'] : NULL;
+  if (!empty($values['uploaded_file'])) {
+    $file = $values['uploaded_file'];
+  }
+
+  $track = hardwoods_jbrowse_get_track($values['track_id']);
+
+  tripal_add_job(
+    'Delete JBrowse track',
+    'hardwoods_jbrowse',
+    'hardwoods_jbrowse_delete_track_from_instance',
+    [$values['track_id']],
+    $user->uid
+  );
+
+  hardwoods_jbrowse_update_track($track, ['is_deleted' => 1]);
+
+  drupal_goto('admin/hardwoods_jbrowse/instances/' . $track->instance_id);
+}

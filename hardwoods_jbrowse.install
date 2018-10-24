@@ -85,7 +85,12 @@ function hardwoods_jbrowse_schema() {
       ],
       'created_at' => [
         'type' => 'int',
-        'not null' => 'true',
+        'not null' => TRUE,
+      ],
+      'is_deleted' => [
+        'type' => 'int',
+        'not null' => FALSE,
+        'default' => 0,
       ],
     ],
     'primary key' => [

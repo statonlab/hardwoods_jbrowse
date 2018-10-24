@@ -50,3 +50,26 @@ function hardwoods_jbrowse_add_track_to_instance($track_id) {
     throw new Exception('Unable to add track. See errors above.');
   }
 }
+
+/**
+ * Job to delete a track from an instance.
+ *
+ * @param $track_id
+ *
+ * @throws \Exception
+ */
+function hardwoods_jbrowse_delete_track_from_instance($track_id)
+{
+  $track = hardwoods_jbrowse_get_track($track_id);
+
+  if (empty($track)) {
+    throw new Exception('Unable to find instance to create files for.');
+  }
+
+  if (hardwoods_jbrowse_cmd_delete_track($track) != 0) {
+    hardwoods_jbrowse_update_track($track, ['is_deleted' => 0]);
+    throw new Exception('Unable to add track. See errors above.');
+  }
+
+  hardwoods_jbrowse_delete_track($track_id);
+}
