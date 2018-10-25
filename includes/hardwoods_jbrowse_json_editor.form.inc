@@ -190,7 +190,7 @@ function hardwoods_jbrowse_json_editor_form_submit($form, &$form_state) {
   }
 
   if ($classname) {
-    $track_json['style']['classname'] = $classname;
+    $track_json['style']['className'] = $classname;
   }
 
   $json['tracks'][$track_index] = $track_json;
