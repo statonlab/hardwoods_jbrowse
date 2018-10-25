@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Add a track to an instance form.
+ *
+ * @param $form
+ * @param $form_state
+ * @param $instance_id
+ *
+ * @return array
+ */
 function hardwoods_jbrowse_add_track_form($form, &$form_state, $instance_id) {
   if (empty(hardwoods_jbrowse_get_instance($instance_id))) {
     drupal_not_found();
@@ -25,23 +34,17 @@ function hardwoods_jbrowse_add_track_form($form, &$form_state, $instance_id) {
 
   $form['data']['track_type'] = [
     '#type' => 'select',
-    '#description' => t(
-      'See http://gmod.org/wiki/JBrowse_Configuration_Guide#flatfile-to-json.pl for more info.'
-    ),
+    '#description' => t('See http://gmod.org/wiki/JBrowse_Configuration_Guide#flatfile-to-json.pl for more info.'),
     '#required' => TRUE,
     '#title' => t('Track Type'),
-    '#options' => drupal_map_assoc(
-      hardwoods_get_track_types()
-    ),
+    '#options' => drupal_map_assoc(hardwoods_get_track_types()),
   ];
 
   $form['data']['file_type'] = [
     '#type' => 'select',
     '#title' => t('File Type'),
     '#options' => drupal_map_assoc(['gff', 'bed', 'gbk']),
-    '#description' => t(
-      'See http://gmod.org/wiki/JBrowse_Configuration_Guide#flatfile-to-json.pl for more info.'
-    ),
+    '#description' => t('See http://gmod.org/wiki/JBrowse_Configuration_Guide#flatfile-to-json.pl for more info.'),
     '#required' => TRUE,
   ];
 
@@ -53,9 +56,7 @@ function hardwoods_jbrowse_add_track_form($form, &$form_state, $instance_id) {
   $form['data']['file_path'] = [
     '#type' => 'textfield',
     '#title' => t('- OR Path to File on Server -'),
-    '#description' => t(
-      'This path will be ignored if a file is provided above. Ex: sites/default/files/file.fasta or /data/file.fasta'
-    ),
+    '#description' => t('This path will be ignored if a file is provided above. Ex: sites/default/files/file.fasta or /data/file.fasta'),
   ];
 
   $form['submit'] = [
@@ -67,8 +68,10 @@ function hardwoods_jbrowse_add_track_form($form, &$form_state, $instance_id) {
 }
 
 /**
- * @param $form
- * @param $form_state
+ * Validate the add track form.
+ *
+ * @param array $form
+ * @param array $form_state
  */
 function hardwoods_jbrowse_add_track_form_validate($form, &$form_state) {
   $values = $form_state['values'];
@@ -76,10 +79,8 @@ function hardwoods_jbrowse_add_track_form_validate($form, &$form_state) {
   $local_file = isset($values['file_path']) ? $values['file_path'] : NULL;
 
   if (empty($file) && empty($local_file)) {
-    form_set_error(
-      'file',
-      'Please provide a local file path or upload a new file.'
-    );
+    form_set_error('file',
+      'Please provide a local file path or upload a new file.');
   }
   elseif (empty($file) && !empty($local_file)) {
     if (!file_exists($local_file)) {
@@ -98,8 +99,10 @@ function hardwoods_jbrowse_add_track_form_validate($form, &$form_state) {
 }
 
 /**
- * @param $form
- * @param $form_state
+ * Handle form submission for adding a track.
+ *
+ * @param array $form
+ * @param array $form_state
  *
  * @throws \Exception
  */
@@ -114,28 +117,30 @@ function hardwoods_jbrowse_add_track_form_submit($form, &$form_state) {
 
   $instance = hardwoods_jbrowse_get_instance($values['instance_id']);
 
-  $track_id = hardwoods_jbrowse_create_track(
-    $instance,
-    [
-      'label' => $values['label'],
-      'track_type' => $values['track_type'],
-      'file_type' => $values['file_type'],
-      'file' => $file,
-      'created_at' => time(),
-    ]
-  );
+  $track_id = hardwoods_jbrowse_create_track($instance, [
+    'label' => $values['label'],
+    'track_type' => $values['track_type'],
+    'file_type' => $values['file_type'],
+    'file' => $file,
+    'created_at' => time(),
+  ]);
 
-  tripal_add_job(
-    'Add JBrowse track to ' . $instance->title,
-    'hardwoods_jbrowse',
-    'hardwoods_jbrowse_add_track_to_instance',
-    [$track_id],
-    $user->uid
-  );
+  tripal_add_job('Add JBrowse track to ' . $instance->title,
+    'hardwoods_jbrowse', 'hardwoods_jbrowse_add_track_to_instance', [$track_id],
+    $user->uid);
 
   drupal_goto('admin/hardwoods_jbrowse/instances/' . $instance->id);
 }
 
+/**
+ * Delete a track form.
+ *
+ * @param array $form
+ * @param array $form_state
+ * @param int $track_id
+ *
+ * @return array
+ */
 function hardwoods_jbrowse_delete_track_form($form, &$form_state, $track_id) {
 
   $track = hardwoods_jbrowse_get_track($track_id);
@@ -165,8 +170,8 @@ function hardwoods_jbrowse_delete_track_form($form, &$form_state, $track_id) {
 
   $form['cancel'] = [
     '#type' => 'markup',
-    '#markup' => l('Cancel', 'admin/hardwoods_jbrowse/instances/' .
-      $track->instance_id),
+    '#markup' => l('Cancel',
+      'admin/hardwoods_jbrowse/instances/' . $track->instance_id),
   ];
 
   return $form;
@@ -182,20 +187,11 @@ function hardwoods_jbrowse_delete_track_form_submit($form, &$form_state) {
   global $user;
   $values = $form_state['values'];
 
-  $file = isset($values['file_path']) ? $values['file_path'] : NULL;
-  if (!empty($values['uploaded_file'])) {
-    $file = $values['uploaded_file'];
-  }
-
   $track = hardwoods_jbrowse_get_track($values['track_id']);
 
-  tripal_add_job(
-    'Delete JBrowse track',
-    'hardwoods_jbrowse',
-    'hardwoods_jbrowse_delete_track_from_instance',
-    [$values['track_id']],
-    $user->uid
-  );
+  tripal_add_job('Delete JBrowse track', 'hardwoods_jbrowse',
+    'hardwoods_jbrowse_delete_track_from_instance', [$values['track_id']],
+    $user->uid);
 
   hardwoods_jbrowse_update_track($track, ['is_deleted' => 1]);
 
