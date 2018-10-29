@@ -24,6 +24,7 @@ function hardwoods_jbrowse_instances_page() {
     'Submitter',
     'Description',
     'Manage',
+    'Delete'
   ];
 
   $rows = [];
@@ -37,6 +38,7 @@ function hardwoods_jbrowse_instances_page() {
       $instance->user->name,
       $instance->description ?: 'Not provided',
       l('Manage Tracks', 'admin/hardwoods_jbrowse/instances/' . $instance->id),
+      l('Delete Instance', 'admin/hardwoods_jbrowse/instances/'.$instance->id.'/delete')
     ];
   }
 
