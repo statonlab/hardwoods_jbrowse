@@ -195,7 +195,12 @@ function hardwoods_jbrowse_json_editor_form_submit($form, &$form_state) {
 
   $json['tracks'][$track_index] = $track_json;
 
-  hardwoods_jbrowse_save_json($track->instance, $json);
+  if (hardwoods_jbrowse_save_json($track->instance, $json) === FALSE) {
+    drupal_set_message(
+      'Unable to save JSON file. Please make sure it\'s editable.'
+    );
+    return;
+  }
 
   drupal_set_message('Track updated successfully');
 }
