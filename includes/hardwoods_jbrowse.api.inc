@@ -407,5 +407,6 @@ function hardwoods_get_track_types() {
     'FeatureTrack',
     'CanvasFeatures',
     'HTMLFeatures',
+    'HTMLVariants',
   ];
 }
