@@ -63,6 +63,31 @@ function hardwoods_jbrowse_cmd_add_track($track) {
     throw new Exception('Data directory does not exist: ' . $out);
   }
 
+
+
+
+  if ($track->track_type === 'HTMLVariants') {
+    $instance = hardwoods_jbrowse_get_instance($track->instance_id);
+    $json = hardwoods_jbrowse_get_json($instance);
+    $directory = 'vcf';
+    $basename = pathinfo($track->file)['basename'];
+
+    $json['tracks'][] = [
+      'label' => $track->label,
+      'key' => $track->label,
+      'storeClass' => 'JBrowse/Store/SeqFeature/VCFTabix',
+      'urlTemplate' => $directory . '/' . $basename,
+      'type' => $track->track_type,
+    ];
+
+    hardwoods_jbrowse_save_json($instance, $json);
+
+    return;
+  }
+
+
+
+
   hardwoods_jbrowse_safe_exec(
     'perl',
     [

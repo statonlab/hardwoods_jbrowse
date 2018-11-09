@@ -304,12 +304,9 @@ function hardwoods_jbrowse_make_slug($string) {
   return strtolower(trim($slug, '_'));
 }
 
-function hardwoods_jbrowse_upload_file($field) {
-  $directory = 'public://tripal/hardwoods_jbrowse';
-  file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
-
+function hardwoods_jbrowse_upload_file($field, $path = NULL) {
   $file = file_save_upload($field, [
-      'file_validate_extensions' => ['fasta faa fna fastq txt gff'],
+      'file_validate_extensions' => ['fasta faa fna fastq txt gff vcf wig gz tbi'],
       'file_validate_size' => [1024 * 1024 * 1024 * 20] // Make it 20 GB max
     ]);
 
@@ -317,7 +314,16 @@ function hardwoods_jbrowse_upload_file($field) {
     return FALSE;
   }
 
-  $file = file_move($file, $directory . '/' . $file->filename);
+  $directory = 'public://tripal/hardwoods_jbrowse';
+  file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
+  $file = file_move($file, $directory);
+
+  if (isset($path)) {
+    file_prepare_directory($path, FILE_CREATE_DIRECTORY);
+    $oldname = drupal_realpath($directory) . '/' . $file->filename;
+    $newname = $path . '/' . $file->filename;
+    rename($oldname, $newname);
+  }
 
   return !$file ? FALSE : drupal_realpath($file->uri);
 }

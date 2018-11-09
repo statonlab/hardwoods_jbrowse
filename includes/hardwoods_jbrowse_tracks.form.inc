@@ -38,7 +38,7 @@ function hardwoods_jbrowse_add_track_form($form, &$form_state, $instance_id) {
   $form['data']['file_type'] = [
     '#type' => 'select',
     '#title' => t('File Type'),
-    '#options' => drupal_map_assoc(['gff', 'bed', 'gbk']),
+    '#options' => drupal_map_assoc(['gff', 'bed', 'gbk', 'vcf']),
     '#description' => t(
       'See http://gmod.org/wiki/JBrowse_Configuration_Guide#flatfile-to-json.pl for more info.'
     ),
@@ -73,6 +73,21 @@ function hardwoods_jbrowse_add_track_form($form, &$form_state, $instance_id) {
 function hardwoods_jbrowse_add_track_form_validate($form, &$form_state) {
   $values = $form_state['values'];
   $file = $_FILES['files']['tmp_name']['file'];
+  $settings = hardwoods_jbrowse_get_settings();
+  $instance = hardwoods_jbrowse_get_instance($values['instance_id']);
+  $data = $settings['data_dir'];
+  $extension = $values['file_type'];
+
+  switch ($extension)
+  {
+    case 'vcf':
+      $path = $data . '/' . hardwoods_jbrowse_make_slug($instance->title) . '/data/vcf';
+      break;
+    default:
+      $path = NULL;
+      break;
+  }
+
   $local_file = isset($values['file_path']) ? $values['file_path'] : NULL;
 
   if (empty($file) && empty($local_file)) {
@@ -87,7 +102,7 @@ function hardwoods_jbrowse_add_track_form_validate($form, &$form_state) {
     }
   }
   else {
-    $file = hardwoods_jbrowse_upload_file('file');
+    $file = hardwoods_jbrowse_upload_file('file', $path);
     if (!$file) {
       form_set_error('file', 'Unable to upload file');
     }
