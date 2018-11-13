@@ -63,51 +63,62 @@ function hardwoods_jbrowse_cmd_add_track($track) {
     throw new Exception('Data directory does not exist: ' . $out);
   }
 
+  switch ($track->track_type)
+  {
+    case 'HTMLVariants':
+      $instance = hardwoods_jbrowse_get_instance($track->instance_id);
+      $json = hardwoods_jbrowse_get_json($instance);
+      $directory = 'vcf';
+      $basename = pathinfo($track->file)['basename'];
+
+      $json['tracks'][] = [
+        'label' => $track->label,
+        'key' => $track->label,
+        'storeClass' => 'JBrowse/Store/SeqFeature/VCFTabix',
+        'urlTemplate' => $directory . '/' . $basename,
+        'type' => $track->track_type,
+      ];
+
+      hardwoods_jbrowse_save_json($instance, $json);
+      break;
+    case 'XYPlot':
+      $instance = hardwoods_jbrowse_get_instance($track->instance_id);
+      $json = hardwoods_jbrowse_get_json($instance);
+      $basename = pathinfo($track->file)['basename'];
+
+      $json['tracks'][] = [
+        'label' => $track->label,
+        'key' => $track->label,
+        'storeClass' => 'JBrowse/Store/SeqFeature/BigWig',
+        'urlTemplate' => 'wig/' . $basename,
+        'type' => 'JBrowse/View/Track/Wiggle/XYPlot',
 
 
+      ];
 
-  if ($track->track_type === 'HTMLVariants') {
-    $instance = hardwoods_jbrowse_get_instance($track->instance_id);
-    $json = hardwoods_jbrowse_get_json($instance);
-    $directory = 'vcf';
-    $basename = pathinfo($track->file)['basename'];
-
-    $json['tracks'][] = [
-      'label' => $track->label,
-      'key' => $track->label,
-      'storeClass' => 'JBrowse/Store/SeqFeature/VCFTabix',
-      'urlTemplate' => $directory . '/' . $basename,
-      'type' => $track->track_type,
-    ];
-
-    hardwoods_jbrowse_save_json($instance, $json);
-
-    return;
+      hardwoods_jbrowse_save_json($instance, $json);
+      break;
+    default:
+    hardwoods_jbrowse_safe_exec(
+      'perl',
+      [
+        $bin . '/flatfile-to-json.pl',
+        '--' . $track->file_type,
+        $instance->file,
+        '--trackLabel',
+        hardwoods_jbrowse_make_slug($track->label),
+        '--key',
+        $track->label,
+        '--out',
+        $out,
+        '--trackType',
+        $track->track_type,
+      ],
+      $ignore,
+      $ret
+    );
+    return $ret;
   }
-
-
-
-
-  hardwoods_jbrowse_safe_exec(
-    'perl',
-    [
-      $bin . '/flatfile-to-json.pl',
-      '--' . $track->file_type,
-      $instance->file,
-      '--trackLabel',
-      hardwoods_jbrowse_make_slug($track->label),
-      '--key',
-      $track->label,
-      '--out',
-      $out,
-      '--trackType',
-      $track->track_type,
-    ],
-    $ignore,
-    $ret
-  );
-
-  return $ret;
 }
 
 /**

@@ -304,16 +304,29 @@ function hardwoods_jbrowse_make_slug($string) {
   return strtolower(trim($slug, '_'));
 }
 
-function hardwoods_jbrowse_upload_file($field, $path = NULL) {
+function hardwoods_jbrowse_upload_file($field) {
   $file = file_save_upload($field, [
-      'file_validate_extensions' => ['fasta faa fna fastq txt gff vcf wig gz tbi'],
+      'file_validate_extensions' => ['fasta faa fna fastq txt gff vcf wig gz tbi bw'],
       'file_validate_size' => [1024 * 1024 * 1024 * 20] // Make it 20 GB max
     ]);
 
-  if (!$file) {
-    return FALSE;
-  }
+  return !$file ? FALSE : $file; // drupal_realpath($file->uri);
+}
 
+/**
+ * Moves a file to an intermediate directory, then to the destination, if given.
+ *
+ * @param $file
+ *  The file object.
+ *
+ * @param $path
+ *  The path to the directory of the new object.
+ *  If the directory provided does not exist, it will be created.
+ *
+ * @return
+ *  The moved file.
+ */
+function hardwoods_jbrowse_move_file($file, $path = NULL) {
   $directory = 'public://tripal/hardwoods_jbrowse';
   file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
   $file = file_move($file, $directory);
@@ -325,8 +338,30 @@ function hardwoods_jbrowse_upload_file($field, $path = NULL) {
     rename($oldname, $newname);
   }
 
-  return !$file ? FALSE : drupal_realpath($file->uri);
+  return $file;
 }
+
+/**
+ * Copy a file into a new directory.
+ * If the directory provided does not exist, it will be created.
+ *
+ * @param $source
+ *  File path of the source file.
+ * @param $destination
+ *  File path to the destination directory.
+ *
+ * @return bool
+ */
+function hardwoods_jbrowse_copy_file($source, $destination)
+{
+  file_prepare_directory($destination, FILE_CREATE_DIRECTORY);
+
+  $file_name = pathinfo($source)['basename'];
+  $destination = $destination . '/' . $file_name;
+
+  return copy($source, $destination);
+}
+
 
 /**
  * Build the http query for a given instance to link to JBrowse.
@@ -414,5 +449,6 @@ function hardwoods_get_track_types() {
     'CanvasFeatures',
     'HTMLFeatures',
     'HTMLVariants',
+    'XYPlot',
   ];
 }
