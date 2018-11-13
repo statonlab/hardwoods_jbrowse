@@ -73,8 +73,10 @@ function hardwoods_jbrowse_get_instances($conditions = NULL) {
     $instance->user = $users[$instance->uid];
 
     if (!isset($organisms[$instance->organism_id])) {
-      $organisms[$instance->organism_id] = chado_query('SELECT * FROM {organism} WHERE organism_id=:id',
-        [':id' => $instance->organism_id])->fetchObject();
+      $organisms[$instance->organism_id] = chado_query(
+        'SELECT * FROM {organism} WHERE organism_id=:id',
+        [':id' => $instance->organism_id]
+      )->fetchObject();
     }
     $instance->organism = $organisms[$instance->organism_id];
   }
@@ -93,14 +95,16 @@ function hardwoods_jbrowse_get_instances($conditions = NULL) {
 function hardwoods_jbrowse_create_instance($data) {
   global $user;
 
-  $instance_id = db_insert('hardwoods_jbrowse_instances')->fields([
+  $instance_id = db_insert('hardwoods_jbrowse_instances')->fields(
+    [
       'uid' => $user->uid,
       'organism_id' => $data['organism_id'],
       'title' => $data['title'],
       'description' => isset($data['description']) ? $data['description'] : '',
       'created_at' => $data['created_at'],
       'file' => $data['file'],
-    ])->execute();
+    ]
+  )->execute();
 
   if (!$instance_id) {
     return FALSE;
@@ -138,24 +142,26 @@ function hardwoods_jbrowse_update_instance($id, $data) {
 }
 
 /**
- * @param $instance
+ * @param int|object $instance
  *
  * @return int
  * @throws \Exception
  */
 function hardwoods_jbrowse_delete_instance($instance) {
-  if (is_object($instance)) {
+  if (is_object($instance) && property_exists($instance, 'id')) {
     $id = $instance->id;
   }
   elseif (is_numeric($instance)) {
     $id = $instance;
   }
   else {
-    throw new Exception('Unable to extract instance ID. Please provide a valid ID to delete the instance.');
+    throw new Exception(
+      'Unable to extract instance ID. Please provide a valid ID to delete the instance.'
+    );
   }
 
   return db_delete('hardwoods_jbrowse_instances')
-    ->condition(['id' => $id])
+    ->condition('id', $id)
     ->execute();
 }
 
@@ -170,7 +176,8 @@ function hardwoods_jbrowse_delete_instance($instance) {
 function hardwoods_jbrowse_create_track($instance, $data) {
   global $user;
 
-  $track_id = db_insert('hardwoods_jbrowse_tracks')->fields([
+  $track_id = db_insert('hardwoods_jbrowse_tracks')->fields(
+    [
       'uid' => $user->uid,
       'instance_id' => $instance->id,
       'organism_id' => $instance->organism_id,
@@ -179,7 +186,8 @@ function hardwoods_jbrowse_create_track($instance, $data) {
       'file_type' => $data['file_type'],
       'created_at' => $data['created_at'],
       'file' => $data['file'],
-    ])->execute();
+    ]
+  )->execute();
 
   if (!$track_id) {
     return FALSE;
@@ -308,7 +316,8 @@ function hardwoods_jbrowse_upload_file($field) {
   $file = file_save_upload($field, [
       'file_validate_extensions' => ['fasta faa fna fastq txt gff vcf wig gz tbi bw'],
       'file_validate_size' => [1024 * 1024 * 1024 * 20] // Make it 20 GB max
-    ]);
+    ]
+  );
 
   return !$file ? FALSE : $file; // drupal_realpath($file->uri);
 }
@@ -375,9 +384,15 @@ function hardwoods_jbrowse_build_http_query($instance) {
   $tracks = hardwoods_jbrowse_get_tracks($instance);
   $tracks_path = '';
   if (!empty($tracks)) {
-    $tracks_path = implode(',', array_map(function ($track) {
-        return hardwoods_jbrowse_make_slug($track->label);
-      }, $tracks));
+    $tracks_path = implode(
+      ',',
+      array_map(
+        function ($track) {
+          return hardwoods_jbrowse_make_slug($track->label);
+        },
+        $tracks
+      )
+    );
   }
 
   return [

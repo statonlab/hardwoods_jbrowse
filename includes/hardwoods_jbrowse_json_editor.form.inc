@@ -67,10 +67,8 @@ function hardwoods_jbrowse_json_editor_form($form, &$form_state, $track_id) {
     '#default_value' => $track_json['metadata']['category'] ?? '',
   ];
 
-
   $track_type = $track_json['trackType'] ?? $track_json['type'];
-  //"trackType": "HTMLFeatures",
-  //            "type": "HTMLFeatures",
+
   $form['track_type'] = [
     '#type' => 'select',
     '#title' => t('Track Type'),
@@ -131,8 +129,9 @@ function hardwoods_jbrowse_json_editor_form($form, &$form_state, $track_id) {
  * @param $form_state
  */
 function hardwoods_jbrowse_json_editor_form_validate($form, &$form_state) {
+  $values = $form_state['values'];
   $menu_template = $values['menu_template'] ?? NULL;
-  dpm($menu_template);
+
   if ($menu_template && !empty($menu_template)) {
     if (!json_decode($menu_template)) {
       form_set_error(
@@ -191,12 +190,17 @@ function hardwoods_jbrowse_json_editor_form_submit($form, &$form_state) {
   }
 
   if ($classname) {
-    $track_json['style']['classname'] = $classname;
+    $track_json['style']['className'] = $classname;
   }
 
   $json['tracks'][$track_index] = $track_json;
 
-  hardwoods_jbrowse_save_json($track->instance, $json);
+  if (hardwoods_jbrowse_save_json($track->instance, $json) === FALSE) {
+    drupal_set_message(
+      'Unable to save JSON file. Please make sure it\'s editable.'
+    );
+    return;
+  }
 
   drupal_set_message('Track updated successfully');
 }
