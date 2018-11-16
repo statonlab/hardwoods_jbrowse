@@ -24,7 +24,8 @@ function hardwoods_jbrowse_instances_page() {
     'Submitter',
     'Description',
     'Manage',
-    'Delete'
+    'Launch',
+    'Delete',
   ];
 
   $rows = [];
@@ -32,13 +33,18 @@ function hardwoods_jbrowse_instances_page() {
     $rows[] = [
       l(
         $instance->title,
-        "{$settings['link']}",
-        ['query' => hardwoods_jbrowse_build_http_query($instance)]
+        'admin/hardwoods_jbrowse/instances/' . $instance->id
       ),
       $instance->user->name,
       $instance->description ?: 'Not provided',
       l('Manage Tracks', 'admin/hardwoods_jbrowse/instances/' . $instance->id),
-      l('Delete Instance', 'admin/hardwoods_jbrowse/instances/'.$instance->id.'/delete')
+      l(
+        'Launch',
+        $settings['link'],
+        ['query' => hardwoods_jbrowse_build_http_query($instance)]
+      ),
+      l('Delete Instance', 'admin/hardwoods_jbrowse/instances/'.$instance->id.'/delete'),
+
     ];
   }
 
