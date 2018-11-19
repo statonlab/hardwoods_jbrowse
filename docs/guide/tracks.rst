@@ -15,7 +15,7 @@ The manage tracks link, will lead to a page where you can create and delete trac
 .. warning::
     Please note that files don't get automatically removed. You have to manually remove the track files yourself.
 
-
+https://drive.google.com/file/d/0B1X1NNL83OH8eVZYZXFfcUs0NG8/view?usp=sharing
 Editing Tracks
 --------------
 
