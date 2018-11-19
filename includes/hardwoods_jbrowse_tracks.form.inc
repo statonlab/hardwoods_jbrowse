@@ -50,7 +50,7 @@ function hardwoods_jbrowse_add_track_form($form, &$form_state, $instance_id) {
 
   $form['data']['file'] = [
     '#type' => 'file',
-    '#title' => t('Reference Sequence FASTA File'),
+    '#title' => t('File'),
   ];
 
   $form['data']['file_path'] = [
