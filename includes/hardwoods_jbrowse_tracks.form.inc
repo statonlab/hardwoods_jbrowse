@@ -121,7 +121,7 @@ function hardwoods_jbrowse_add_track_form_validate($form, &$form_state) {
     case 'vcf':
       {
         $tbi = $_FILES['files']['tmp_name']['file2'];
-        $local_dir = $values['dir_path'] ?? NULL;
+        $local_dir = isset($values['dir_path']) ? $values['dir_path'] : NULL;
 
         if (empty($file) && empty($tbi) && empty($local_dir)) {
           form_set_error('file',
@@ -140,7 +140,8 @@ function hardwoods_jbrowse_add_track_form_validate($form, &$form_state) {
             else {
               $file_gz = glob($local_dir . '/*.vcf.gz');
               $file_tbi = glob($local_dir . '/*.vcf.gz.tbi');
-              if (count($file_gz) != 1 && count($file_tbi) != 1) {
+
+              if (count($file_gz) != 1 || count($file_tbi) != 1) {
                 form_set_error('file_path',
                   'Please provide a directory with exactly one gz and one tbi file.');
               }
@@ -225,6 +226,12 @@ function hardwoods_jbrowse_add_track_form_submit($form, &$form_state) {
   $values = $form_state['values'];
 
   $file = isset($values['file_path']) ? $values['file_path'] : NULL;
+  if (!empty($values['dir_path'])) {
+    $file = $values['dir_path'];
+  }
+  if (!empty($values['uploaded_gz'])) {
+    $file = $values['uploaded_file'];
+  }
   if (!empty($values['uploaded_file'])) {
     $file = $values['uploaded_file'];
   }

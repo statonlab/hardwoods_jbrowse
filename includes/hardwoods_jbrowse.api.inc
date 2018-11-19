@@ -353,12 +353,8 @@ function hardwoods_jbrowse_move_file($file, $path = NULL) {
  * @return bool
  */
 function hardwoods_jbrowse_copy_file($source, $destination) {
-  if (is_dir($source)) {
-    return file_unmanaged_copy($source, $destination, FILE_EXISTS_ERROR);
-  }
-
   file_prepare_directory($destination, FILE_CREATE_DIRECTORY);
-  return file_unmanaged_copy($source, $destination);
+  return file_unmanaged_copy($source, $destination, FILE_EXISTS_ERROR);
 }
 
 /**
