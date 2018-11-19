@@ -230,7 +230,7 @@ function hardwoods_jbrowse_add_track_form_submit($form, &$form_state) {
     $file = $values['dir_path'];
   }
   if (!empty($values['uploaded_gz'])) {
-    $file = $values['uploaded_file'];
+    $file = $values['uploaded_gz'];
   }
   if (!empty($values['uploaded_file'])) {
     $file = $values['uploaded_file'];
