@@ -69,13 +69,14 @@ function hardwoods_jbrowse_cmd_add_track($track) {
       $instance = hardwoods_jbrowse_get_instance($track->instance_id);
       $json = hardwoods_jbrowse_get_json($instance);
       $directory = 'vcf';
-      $basename = pathinfo($track->file)['basename'];
+      $file_name = glob($track->file . '/' . '*.vcf.gz')[0];
+      $file_name = pathinfo($file_name)['basename'];
 
       $json['tracks'][] = [
         'label' => $track->label,
         'key' => $track->label,
         'storeClass' => 'JBrowse/Store/SeqFeature/VCFTabix',
-        'urlTemplate' => $directory . '/' . $basename,
+        'urlTemplate' => $directory . '/' . $file_name,
         'type' => $track->track_type,
       ];
 

@@ -14,6 +14,8 @@ function hardwoods_jbrowse_instance_page($instance_id) {
     return '';
   }
 
+  $settings = hardwoods_jbrowse_get_settings();
+
   drupal_set_title("Manage $instance->title JBrowse");
 
   $content = [];
@@ -32,6 +34,14 @@ function hardwoods_jbrowse_instance_page($instance_id) {
             "{$instance->organism->genus} {$instance->organism->species}",
           ],
           ['Created By', $instance->user->name],
+          [
+            'Launch',
+            l(
+              'See ' . $instance->title . ' on JBrowse',
+              $settings['link'],
+              ['query' => hardwoods_jbrowse_build_http_query($instance)]
+            ),
+          ],
         ],
       ]
     ),
@@ -43,6 +53,7 @@ function hardwoods_jbrowse_instance_page($instance_id) {
     '#type' => 'item',
     '#markup' => '<h4>Tracks</h4>',
   ];
+
   if (empty($tracks)) {
     $content['no_tracks'] = [
       '#type' => 'item',
@@ -59,8 +70,10 @@ function hardwoods_jbrowse_instance_page($instance_id) {
           $track->user->name,
           date('m/d/Y', $track->created_at),
           l('Manage Track', 'admin/hardwoods_jbrowse/tracks/' . $track->id),
-          l('Delete Track', 'admin/hardwoods_jbrowse/tracks/' . $track->id . '/delete'),
-          $track->is_deleted,
+          l(
+            'Delete Track',
+            'admin/hardwoods_jbrowse/tracks/' . $track->id . '/delete'
+          ),
         ];
       },
       $tracks
@@ -79,7 +92,6 @@ function hardwoods_jbrowse_instance_page($instance_id) {
             'Created At',
             'Manage',
             'Delete Track',
-            'Is Deleted',
           ],
           'rows' => $rows,
         ]
