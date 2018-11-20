@@ -69,7 +69,11 @@ function hardwoods_jbrowse_cmd_add_track($track) {
       $instance = hardwoods_jbrowse_get_instance($track->instance_id);
       $json = hardwoods_jbrowse_get_json($instance);
       $directory = 'vcf';
-      $file_name = glob($track->file . '/' . '*.vcf.gz')[0];
+
+      $file_name = $track->file;
+      if (is_dir($track->file)) {
+        $file_name = glob($track->file . '/' . '*.vcf.gz')[0];
+      }
       $file_name = pathinfo($file_name)['basename'];
 
       $json['tracks'][] = [
@@ -82,6 +86,7 @@ function hardwoods_jbrowse_cmd_add_track($track) {
 
       hardwoods_jbrowse_save_json($instance, $json);
       break;
+
     case 'XYPlot':
       $instance = hardwoods_jbrowse_get_instance($track->instance_id);
       $json = hardwoods_jbrowse_get_json($instance);
@@ -93,12 +98,11 @@ function hardwoods_jbrowse_cmd_add_track($track) {
         'storeClass' => 'JBrowse/Store/SeqFeature/BigWig',
         'urlTemplate' => 'wig/' . $basename,
         'type' => 'JBrowse/View/Track/Wiggle/XYPlot',
-
-
       ];
 
       hardwoods_jbrowse_save_json($instance, $json);
       break;
+
     default:
     hardwoods_jbrowse_safe_exec(
       'perl',

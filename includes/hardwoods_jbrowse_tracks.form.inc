@@ -119,92 +119,111 @@ function hardwoods_jbrowse_add_track_form_validate($form, &$form_state) {
 
   switch ($file_type) {
     case 'vcf':
-      {
-        $tbi = $_FILES['files']['tmp_name']['file2'];
-        $local_dir = isset($values['dir_path']) ? $values['dir_path'] : NULL;
+      $tbi = $_FILES['files']['tmp_name']['file2'];
+      $local_dir = isset($values['dir_path']) ? $values['dir_path'] : NULL;
 
-        if (empty($file) && empty($tbi) && empty($local_dir)) {
-          form_set_error('file',
-            'Please provide a local directory path or upload files.');
+      if (empty($file) && empty($tbi) && empty($local_dir)) {
+        form_set_error('file',
+          'Please provide a local directory path or upload files.');
+      }
+      elseif (empty($file) && empty($tbi) && !empty($local_dir)) {
+        if (!file_exists($local_dir)) {
+          form_set_error('file_path', 'The directory provided does not exist.');
         }
-        elseif (empty($file) && empty($tbi) && !empty($local_dir)) {
-          if (!file_exists($local_dir)) {
+        else {
+          if (!is_dir($local_dir)) {
             form_set_error('file_path',
-              'The directory provided does not exist.');
+              'The file provided is not a directory.');
           }
           else {
-            if (!is_dir($local_dir)) {
+            $file_gz = glob($local_dir . '/*.vcf.gz');
+            $file_tbi = glob($local_dir . '/*.vcf.gz.tbi');
+
+            if (count($file_gz) != 1 || count($file_tbi) != 1) {
               form_set_error('file_path',
-                'The file provided is not a directory.');
+                'Please provide a directory with exactly one gz and one tbi file.');
             }
             else {
-              $file_gz = glob($local_dir . '/*.vcf.gz');
-              $file_tbi = glob($local_dir . '/*.vcf.gz.tbi');
-
-              if (count($file_gz) != 1 || count($file_tbi) != 1) {
-                form_set_error('file_path',
-                  'Please provide a directory with exactly one gz and one tbi file.');
+              if (!hardwoods_jbrowse_copy_file($file_gz[0], $path)) {
+                form_set_error('Failed to copy file' . $file_gz[0] . ' to ' . $path);
               }
               else {
-                hardwoods_jbrowse_copy_file($file_gz[0], $path);
-                hardwoods_jbrowse_copy_file($file_tbi[0], $path);
+                if (!hardwoods_jbrowse_copy_file($file_tbi[0], $path)) {
+                  form_set_error('Failed to copy file' . $file_gz[0] . ' to ' . $path);
+                }
               }
             }
           }
         }
-        elseif (empty($file) && !empty($tbi)) {
-          form_set_error('file', 'Please upload both a gz and a tbi file.');
-        }
-        elseif (!empty($file) && empty($tbi)) {
-          form_set_error('file2', 'Please upload both a gz and a tbi file.');
-        }
-        else {
-          $gz_uploaded = hardwoods_jbrowse_upload_file('file');
-          if (!$gz_uploaded) {
-            form_set_error('file', 'Unable to upload file');
-          }
-          else {
-            $form_state['values']['uploaded_gz'] = $file;
-            hardwoods_jbrowse_move_file($gz_uploaded, $path);
-          }
-
-          $tbi_uploaded = hardwoods_jbrowse_upload_file('file2');
-          if (!$tbi_uploaded) {
-            form_set_error('file2', 'Unable to upload file');
-          }
-          else {
-            $form_state['values']['uploaded_gz'] = $tbi;
-            hardwoods_jbrowse_move_file($tbi_uploaded, $path);
-          }
-        }
-
-        break;
       }
-    default:
-      {
-        $local_file = isset($values['file_path']) ? $values['file_path'] : NULL;
-
-        if (empty($file) && empty($local_file)) {
-          form_set_error('file',
-            'Please provide a local file path or upload a new file.');
-        }
-        elseif (empty($file) && !empty($local_file)) {
-          if (!file_exists($local_file)) {
-            form_set_error('file_path',
-              'The file path provided does not exist.');
-          }
-          else {
-            hardwoods_jbrowse_copy_file($local_file, $path);
-          }
+      elseif (empty($file) && !empty($tbi)) {
+        form_set_error('file', 'Please upload both a gz and a tbi file.');
+      }
+      elseif (!empty($file) && empty($tbi)) {
+        form_set_error('file2', 'Please upload both a gz and a tbi file.');
+      }
+      else {
+        $gz_uploaded = hardwoods_jbrowse_upload_file('file');
+        if (!$gz_uploaded) {
+          form_set_error('file', 'Unable to upload file');
         }
         else {
-          $uploaded = hardwoods_jbrowse_upload_file('file');
-          if (!$uploaded) {
-            form_set_error('file', 'Unable to upload file');
+          $gz_uploaded = hardwoods_jbrowse_move_file($gz_uploaded, $path);
+          if (!isset($gz_uploaded)) {
+            form_set_error('file', 'Failed to move gz file to ' . $path . '.');
           }
           else {
-            $form_state['values']['uploaded_file'] = $file;
-            hardwoods_jbrowse_move_file($uploaded, $path);
+            $form_state['values']['uploaded_gz'] = $gz_uploaded;
+          }
+        }
+
+        $tbi_uploaded = hardwoods_jbrowse_upload_file('file2');
+        if (!$tbi_uploaded) {
+          form_set_error('file2', 'Unable to upload file');
+        }
+        else {
+          $tbi_uploaded = hardwoods_jbrowse_move_file($tbi_uploaded, $path);
+          if (!isset($tbi_uploaded)) {
+            form_set_error('file2',
+              'Failed to move tbi file to ' . $path . '.');
+          }
+          else {
+            $form_state['values']['uploaded_tbi'] = $tbi_uploaded;
+          }
+        }
+      }
+
+      break;
+
+    default:
+      $local_file = isset($values['file_path']) ? $values['file_path'] : NULL;
+
+      if (empty($file) && empty($local_file)) {
+        form_set_error('file',
+          'Please provide a local file path or upload a new file.');
+      }
+      elseif (empty($file) && !empty($local_file)) {
+        if (!file_exists($local_file)) {
+          form_set_error('file_path', 'The file path provided does not exist.');
+        }
+        else {
+          if (!hardwoods_jbrowse_copy_file($local_file, $path)) {
+            form_set_error('Failed to copy file ' . $local_file . ' to ' . $path);
+          }
+        }
+      }
+      else {
+        $uploaded = hardwoods_jbrowse_upload_file('file');
+        if (!$uploaded) {
+          form_set_error('file', 'Unable to upload file');
+        }
+        else {
+          $uploaded = hardwoods_jbrowse_move_file($uploaded, $path);
+          if (!isset($uploaded)) {
+            form_set_error('file', 'Failed to move file to ' . $path);
+          }
+          else {
+            $form_state['values']['uploaded_file'] = $uploaded;
           }
         }
       }

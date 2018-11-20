@@ -112,7 +112,7 @@ function hardwoods_jbrowse_add_form_validate($form, &$form_state) {
     }
     else {
       $uploaded = hardwoods_jbrowse_move_file($uploaded);
-      $form_state['values']['uploaded_file'] = drupal_realpath($uploaded->uri);
+      $form_state['values']['uploaded_file'] = $uploaded;
     }
   }
 

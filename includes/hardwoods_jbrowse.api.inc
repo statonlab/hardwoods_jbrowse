@@ -324,21 +324,23 @@ function hardwoods_jbrowse_upload_file($field) {
  *  If the directory provided does not exist, it will be created.
  *
  * @return
- *  The moved file.
+ *  The path to the moved file, or NULL on fail.
  */
 function hardwoods_jbrowse_move_file($file, $path = NULL) {
   $directory = 'public://tripal/hardwoods_jbrowse';
   file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
-  $file = file_move($file, $directory);
+  $file = file_move($file, $directory, FILE_EXISTS_REPLACE);
 
   if (isset($path)) {
     file_prepare_directory($path, FILE_CREATE_DIRECTORY);
-    $oldname = drupal_realpath($directory) . '/' . $file->filename;
+    $oldname = drupal_realpath($file->uri);
     $newname = $path . '/' . $file->filename;
-    rename($oldname, $newname);
+    if (!rename($oldname, $newname)) {
+      return NULL;
+    }
   }
 
-  return $file;
+  return isset($path) ? $newname : drupal_realpath($file->uri);
 }
 
 /**
