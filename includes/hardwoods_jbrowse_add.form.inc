@@ -106,12 +106,13 @@ function hardwoods_jbrowse_add_form_validate($form, &$form_state) {
     }
   }
   else {
-    $file = hardwoods_jbrowse_upload_file('ref_seq_file');
-    if (!$file) {
+    $uploaded = hardwoods_jbrowse_upload_file('ref_seq_file');
+    if (!$uploaded) {
       form_set_error('ref_seq_file', 'Unable to upload file');
     }
     else {
-      $form_state['values']['uploaded_file'] = $file;
+      $uploaded = hardwoods_jbrowse_move_file($uploaded);
+      $form_state['values']['uploaded_file'] = $uploaded;
     }
   }
 

@@ -67,10 +67,8 @@ function hardwoods_jbrowse_get_instances($conditions = NULL) {
     $instance->user = $users[$instance->uid];
 
     if (!isset($organisms[$instance->organism_id])) {
-      $organisms[$instance->organism_id] = chado_query(
-        'SELECT * FROM {organism} WHERE organism_id=:id',
-        [':id' => $instance->organism_id]
-      )->fetchObject();
+      $organisms[$instance->organism_id] = chado_query('SELECT * FROM {organism} WHERE organism_id=:id',
+        [':id' => $instance->organism_id])->fetchObject();
     }
     $instance->organism = $organisms[$instance->organism_id];
   }
@@ -89,16 +87,14 @@ function hardwoods_jbrowse_get_instances($conditions = NULL) {
 function hardwoods_jbrowse_create_instance($data) {
   global $user;
 
-  $instance_id = db_insert('hardwoods_jbrowse_instances')->fields(
-    [
+  $instance_id = db_insert('hardwoods_jbrowse_instances')->fields([
       'uid' => $user->uid,
       'organism_id' => $data['organism_id'],
       'title' => $data['title'],
       'description' => isset($data['description']) ? $data['description'] : '',
       'created_at' => $data['created_at'],
       'file' => $data['file'],
-    ]
-  )->execute();
+    ])->execute();
 
   if (!$instance_id) {
     return FALSE;
@@ -149,9 +145,7 @@ function hardwoods_jbrowse_delete_instance($instance) {
     $id = $instance;
   }
   else {
-    throw new Exception(
-      'Unable to extract instance ID. Please provide a valid ID to delete the instance.'
-    );
+    throw new Exception('Unable to extract instance ID. Please provide a valid ID to delete the instance.');
   }
 
   return db_delete('hardwoods_jbrowse_instances')
@@ -170,8 +164,7 @@ function hardwoods_jbrowse_delete_instance($instance) {
 function hardwoods_jbrowse_create_track($instance, $data) {
   global $user;
 
-  $track_id = db_insert('hardwoods_jbrowse_tracks')->fields(
-    [
+  $track_id = db_insert('hardwoods_jbrowse_tracks')->fields([
       'uid' => $user->uid,
       'instance_id' => $instance->id,
       'organism_id' => $instance->organism_id,
@@ -180,8 +173,7 @@ function hardwoods_jbrowse_create_track($instance, $data) {
       'file_type' => $data['file_type'],
       'created_at' => $data['created_at'],
       'file' => $data['file'],
-    ]
-  )->execute();
+    ])->execute();
 
   if (!$track_id) {
     return FALSE;
@@ -307,24 +299,58 @@ function hardwoods_jbrowse_make_slug($string) {
 }
 
 function hardwoods_jbrowse_upload_file($field) {
+  $file = file_save_upload($field, [
+      'file_validate_extensions' => ['fasta faa fna fastq txt gff vcf wig gz tbi bw'],
+      'file_validate_size' => [1024 * 1024 * 1024 * 20] // Make it 20 GB max
+    ]);
+
+  return !$file ? FALSE : $file; // drupal_realpath($file->uri);
+}
+
+/**
+ * Moves a file to an intermediate directory, then to the destination, if given.
+ *
+ * @param $file
+ *  The file object.
+ *
+ * @param $path
+ *  The path to the directory of the new object.
+ *  If the directory provided does not exist, it will be created.
+ *
+ * @return
+ *  The path to the moved file, or NULL on fail.
+ */
+function hardwoods_jbrowse_move_file($file, $path = NULL) {
   $directory = 'public://tripal/hardwoods_jbrowse';
   file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
+  $file = file_move($file, $directory, FILE_EXISTS_REPLACE);
 
-  $file = file_save_upload(
-    $field,
-    [
-      'file_validate_extensions' => ['fasta faa fna fastq txt gff'],
-      'file_validate_size' => [1024 * 1024 * 1024 * 20] // Make it 20 GB max
-    ]
-  );
-
-  if (!$file) {
-    return FALSE;
+  if (isset($path)) {
+    file_prepare_directory($path, FILE_CREATE_DIRECTORY);
+    $oldname = drupal_realpath($file->uri);
+    $newname = $path . '/' . $file->filename;
+    if (!rename($oldname, $newname)) {
+      return NULL;
+    }
   }
 
-  $file = file_move($file, $directory . '/' . $file->filename);
+  return isset($path) ? $newname : drupal_realpath($file->uri);
+}
 
-  return !$file ? FALSE : drupal_realpath($file->uri);
+/**
+ * Copy a file into a new directory.
+ * If the directory provided does not exist, it will be created.
+ *
+ * @param $source
+ *  File path of the source file.
+ * @param $destination
+ *  File path to the destination directory.
+ *
+ * @return bool
+ */
+function hardwoods_jbrowse_copy_file($source, $destination) {
+  file_prepare_directory($destination, FILE_CREATE_DIRECTORY);
+  return file_unmanaged_copy($source, $destination, FILE_EXISTS_ERROR);
 }
 
 /**
@@ -339,15 +365,9 @@ function hardwoods_jbrowse_build_http_query($instance) {
   $tracks = hardwoods_jbrowse_get_tracks($instance);
   $tracks_path = '';
   if (!empty($tracks)) {
-    $tracks_path = implode(
-      ',',
-      array_map(
-        function ($track) {
-          return hardwoods_jbrowse_make_slug($track->label);
-        },
-        $tracks
-      )
-    );
+    $tracks_path = implode(',', array_map(function ($track) {
+        return hardwoods_jbrowse_make_slug($track->label);
+      }, $tracks));
   }
 
   return [
@@ -459,5 +479,7 @@ function hardwoods_get_track_types() {
     'FeatureTrack',
     'CanvasFeatures',
     'HTMLFeatures',
+    'HTMLVariants',
+    'XYPlot',
   ];
 }
