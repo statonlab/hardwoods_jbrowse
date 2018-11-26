@@ -1,10 +1,6 @@
-### Hardwoods JBrowse
-
-**NOTE** This module is designed specifically for HardwoodGenomics.org.
-
-Manage JBrowse instances:
-- Create a new JBrowse instance
-- Add new tracks 
+This module allows users to create and manage JBrowse instances and tracks.
+It reduces the need to use perl scripts to generate and configure tracks by
+offering web based forms instead.
 
 ### Documentation
 Visit the [online documentation](https://hardwoods-jbrowse.readthedocs.io/en/latest/) for installation and usage instructions.
