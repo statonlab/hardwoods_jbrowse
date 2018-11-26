@@ -55,6 +55,7 @@ function hardwoods_jbrowse_cmd_add_track($track) {
   $data = $settings['data_dir'];
   $bin = $settings['bin_path'];
   $instance = $track->instance;
+  $menu_template = $settings['menu_template'];
 
   $path = $data . '/' . hardwoods_jbrowse_make_slug($instance->title);
   $out = $path . '/data';
@@ -174,30 +175,30 @@ function hardwoods_jbrowse_cmd_generate_names($instance) {
  * @throws \Exception
  */
 function hardwoods_jbrowse_cmd_delete_track($track) {
-    $settings = hardwoods_jbrowse_get_settings();
+  $settings = hardwoods_jbrowse_get_settings();
 
-    $data = $settings['data_dir'];
-    $bin = $settings['bin_path'];
-    $instance = $track->instance;
+  $data = $settings['data_dir'];
+  $bin = $settings['bin_path'];
+  $instance = $track->instance;
 
-    $path = $data . '/' . hardwoods_jbrowse_make_slug($instance->title);
-    $out = $path . '/data';
+  $path = $data . '/' . hardwoods_jbrowse_make_slug($instance->title);
+  $out = $path . '/data';
 
-    if (!file_exists($out)) {
-        throw new Exception('Data directory does not exist: ' . $out);
-    }
+  if (!file_exists($out)) {
+    throw new Exception('Data directory does not exist: ' . $out);
+  }
 
-    return hardwoods_jbrowse_safe_exec(
-        'perl',
-        [
-            $bin . '/remove-track.pl',
-            '--trackLabel',
-            hardwoods_jbrowse_make_slug($track->label),
-            '--dir',
-            $out,
-            '--delete',
-        ]
-    );
+  return hardwoods_jbrowse_safe_exec(
+    'perl',
+    [
+      $bin . '/remove-track.pl',
+      '--trackLabel',
+      hardwoods_jbrowse_make_slug($track->label),
+      '--dir',
+      $out,
+      '--delete',
+    ]
+  );
 }
 
 /**

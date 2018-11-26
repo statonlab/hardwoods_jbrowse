@@ -10,11 +10,13 @@ function hardwoods_jbrowse_get_settings() {
     'bin_path' => '',
     'link' => '',
     'data_dir' => '',
+    'menu_template' => [],
   ];
 
-  $settings = variable_get('hardwoods_jbrowse_settings', json_encode($default));
+  $variable = variable_get('hardwoods_jbrowse_settings', json_encode($default));
+  $settings = json_decode($variable, TRUE) + $default;
 
-  return json_decode($settings, TRUE);
+  return $settings;
 }
 
 /**
@@ -29,18 +31,10 @@ function hardwoods_jbrowse_save_settings($settings) {
     'bin_path' => '',
     'link' => '',
     'data_dir' => '',
+    'menu_template' => [],
   ];
 
-  $final = [];
-
-  foreach ($default as $key => $value) {
-    if (isset($settings[$key])) {
-      $final[$key] = $settings[$key];
-    }
-    else {
-      $final[$key] = $default[$key];
-    }
-  }
+  $final = $settings + $default;
 
   variable_set('hardwoods_jbrowse_settings', json_encode($final));
 
@@ -385,7 +379,7 @@ function hardwoods_jbrowse_build_http_query($instance) {
 /**
  * Get trackList.json for an instance.
  *
- * @param $instance
+ * @param object $instance
  *
  * @return array Decoded json array.
  *
@@ -402,9 +396,50 @@ function hardwoods_jbrowse_get_json($instance) {
   return json_decode($contents, TRUE);
 }
 
+function hardwoods_jbrowse_get_track_json($track) {
+  if (!$track->instance) {
+    $track->instance = hardwoods_jbrowse_get_instance($track->instance_id);
+  }
+
+  $json = hardwoods_jbrowse_get_json($track->instance);
+  $key = hardwoods_jbrowse_make_slug($track->label);
+  $track_json = NULL;
+  foreach ($json['tracks'] as $index => $jtrack) {
+    if ($jtrack['label'] === $key) {
+      $track_json = $jtrack;
+      break;
+    }
+  }
+
+  return $track_json;
+}
+
 /**
- * @param $instance
- * @param $data
+ * @param object $track Track object
+ * @param array $track_json Edited track array.
+ *
+ * @throws \Exception
+ */
+function hardwoods_jbrowse_save_track_json($track, $track_json) {
+  if (!$track->instance) {
+    $track->instance = hardwoods_jbrowse_get_instance($track->instance_id);
+  }
+
+  $json = hardwoods_jbrowse_get_json($track->instance);
+  $key = hardwoods_jbrowse_make_slug($track->label);
+  foreach ($json['tracks'] as $index => $jtrack) {
+    if ($jtrack['label'] === $key) {
+      $json['tracks'][$index] = $track_json;
+      break;
+    }
+  }
+
+  return hardwoods_jbrowse_save_json($track->instance, $json);
+}
+
+/**
+ * @param object $instance
+ * @param array $data
  *
  * @throws \Exception
  * @return bool|int

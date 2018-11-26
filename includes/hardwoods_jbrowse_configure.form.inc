@@ -56,6 +56,20 @@ function hardwoods_jbrowse_configure_form($form, &$form_state) {
     '#required' => TRUE,
   ];
 
+  $form['menu_template'] = [
+    '#title' => t('Default menuTemplate'),
+    '#description' => t(
+      'Default menuTemplate in the trackList.json file. See 
+       the JBrowse documentation for more info.'
+    ),
+    '#type' => 'textarea',
+    '#required' => FALSE,
+    '#default_value' => json_encode(
+      $settings['menu_template'],
+      JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+    ),
+  ];
+
   $form['submit'] = [
     '#type' => 'submit',
     '#value' => 'Save Settings',
@@ -99,6 +113,16 @@ function hardwoods_jbrowse_configure_form_validate($form, &$form_state) {
   if (!file_exists($link_path)) {
     form_set_error('link', 'index.html does not exist in ' . $link_path);
   }
+
+  $menu_template = $values['menu_template'];
+  if (!empty($menu_template) && !json_decode(
+      '{"menuTemplate": ' . $menu_template . '}'
+    )) {
+    form_set_error(
+      'menu_template',
+      'Please provide valid JSON for menuTemplate.'
+    );
+  }
 }
 
 /**
@@ -109,10 +133,22 @@ function hardwoods_jbrowse_configure_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $bin_path = rtrim($values['bin_path'], '/');
 
+  if (!empty($values['menu_template'])) {
+    $menu_template = json_decode(
+      '{"menuTemplate": ' . $values['menu_template'] . '}',
+      TRUE
+    );
+    $menu_template = $menu_template['menuTemplate'];
+  }
+  else {
+    $menu_template = [];
+  }
+
   $settings = [
     'data_dir' => rtrim($values['data_dir'], '/'),
     'bin_path' => $bin_path,
     'link' => $values['link'],
+    'menu_template' => $menu_template,
   ];
 
   hardwoods_jbrowse_save_settings($settings);
