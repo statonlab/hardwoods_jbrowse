@@ -6,9 +6,8 @@ Manage JBrowse instances:
 - Create a new JBrowse instance
 - Add new tracks 
 
-### Usage
-
-Install the module and visit the admin page: `/admin/hardwoods_jbrowse`.
+### Documentation
+Visit the [online documentation](https://hardwoods-jbrowse.readthedocs.io/en/latest/) for installation and usage instructions.
 
 ### License
 
